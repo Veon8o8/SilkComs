@@ -2,7 +2,7 @@
 
 // 部门管理框架
 
-import { Button, Popconfirm, Space, message, Modal, Form, Input, InputNumber } from 'antd';
+import { Button, Popconfirm, Space, message, Modal, Form, Input, InputNumber, Row, Col } from 'antd';
 import Card from 'antd/lib/card/Card';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import React, { createRef } from 'react';
@@ -34,6 +34,7 @@ interface _FrameDepartmentMgmtState {
     dataSource: DepartmentType[];
     modalVisible: boolean;
     editingDepartment: DepartmentType | null;
+    searchName: string;
 }
 
 class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepartmentMgmtProps, _FrameDepartmentMgmtState> {
@@ -46,6 +47,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
             dataSource: initData,
             modalVisible: false,
             editingDepartment: null,
+            searchName: '',
         };
     }
 
@@ -60,7 +62,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
     handleSave = () => {
         const { editingDepartment, dataSource } = this.state;
         const form = this.formRef.current;
-
+        
         form.validateFields().then((values: any) => {
             if (editingDepartment) {
                 // 编辑部门
@@ -141,6 +143,20 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         });
     };
 
+    // 搜索处理
+    handleSearch = (value: string) => {
+        this.setState({ searchName: value }, () => {
+            this.actionRef.current?.reload();
+        });
+    };
+
+    // 重置搜索
+    handleReset = () => {
+        this.setState({ searchName: '' }, () => {
+            this.actionRef.current?.reload();
+        });
+    };
+
     // 渲染操作列
     renderActions = (_: any, record: DepartmentType) => {
         return (
@@ -170,7 +186,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
     // 表格列配置
     getColumns = (): ProColumns<DepartmentType>[] => {
         const { t } = this.props;
-
+        
         return [
             {
                 title: 'ID',
@@ -180,22 +196,20 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                 width: 80,
             },
             {
-                title: t('department.name') || '部门名称',
+                title: t('department.name'),
                 dataIndex: 'name',
                 valueType: 'text',
-                fieldProps: {
-                    placeholder: '请输入部门名称',
-                },
+                search: false, // 禁用默认搜索，使用自定义搜索框
             },
             {
-                title: t('department.count') || '人数',
+                title: t('department.count'),
                 dataIndex: 'count',
                 valueType: 'digit',
                 search: false,
                 width: 100,
             },
             {
-                title: t('department.operation') || '操作',
+                title: t('department.operation'),
                 valueType: 'option',
                 width: 150,
                 render: this.renderActions,
@@ -205,14 +219,13 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
 
     // 搜索筛选逻辑（前端过滤）
     request = async (params: any) => {
-        const { name } = params;
-        const { dataSource } = this.state;
-        let filteredData = [...dataSource];
+        const { searchName } = this.state;
+        let filteredData = [...this.state.dataSource];
 
         // 按名字模糊搜索
-        if (name) {
+        if (searchName) {
             filteredData = filteredData.filter(item =>
-                item.name.toLowerCase().includes(name.toLowerCase())
+                item.name.toLowerCase().includes(searchName.toLowerCase())
             );
         }
 
@@ -223,10 +236,44 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         };
     };
 
+    // 自定义搜索栏渲染
+    renderSearchBar = () => {
+        return (
+            <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+                <Col>
+                    <Button 
+                        type="primary" 
+                        icon={<PlusOutlined />}
+                        onClick={this.showAddModal}
+                    >
+                        添加部门
+                    </Button>
+                </Col>
+                <Col>
+                    <Space>
+                        <Input.Search
+                            placeholder="请输入部门名称"
+                            allowClear
+                            onSearch={this.handleSearch}
+                            onChange={(e) => {
+                                if (!e.target.value) {
+                                    this.handleSearch('');
+                                }
+                            }}
+                            style={{ width: 200 }}
+                        />
+                        <Button onClick={this.handleReset}>
+                            重置
+                        </Button>
+                    </Space>
+                </Col>
+            </Row>
+        );
+    };
+
     // 渲染模态框
     renderModal = () => {
         const { modalVisible, editingDepartment } = this.state;
-        const { t } = this.props;
 
         return (
             <Modal
@@ -275,32 +322,20 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
     };
 
     render() {
-        const { t } = this.props;
         const columns = this.getColumns();
 
         return (
             <Card title="部门管理" variant="borderless" style={{ width: "100%", height: "100%" }}>
-                <div style={{ marginBottom: 16 }}>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={this.showAddModal}
-                    >
-                        添加部门
-                    </Button>
-                </div>
+                {this.renderSearchBar()}
                 <ProTable<DepartmentType>
-                    headerTitle="部门列表"
                     actionRef={this.actionRef}
                     rowKey="id"
                     columns={columns}
                     request={this.request}
-                    search={{
-                        labelWidth: 'auto',
-                        defaultCollapsed: false,
-                    }}
+                    search={false}
                     pagination={false}
                     bordered
+                    options={false}
                     toolBarRender={false}
                 />
                 {this.renderModal()}

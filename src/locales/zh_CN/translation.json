@@ -24,5 +24,8 @@
 
     "front-page": "首页",
     "employee-file": "员工档案",
-    "department-mgmt": "部门管理"
+    "department-mgmt": "部门管理",
+    "department.name": "部门名称",
+    "department.count": "人数",
+    "department.operation": "操作"
 }
