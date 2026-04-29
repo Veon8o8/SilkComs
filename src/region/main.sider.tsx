@@ -58,6 +58,7 @@ export class _MainSider extends React.Component<WithTranslation & MainSiderProps
 
         const menuIcons = [
             HomeOutlined,        // 首页
+            ProfileOutlined,     // 部门管理
             ProfileOutlined,     // 员工档案
         ];
 

@@ -12,6 +12,7 @@ import { MENU_KEY } from '../config/sider';
 import { strUtil } from '../utils/StrUtil';
 import { FrameHome } from '../page/home/frame';
 import { FrameEmployeeFile } from '../page/ef/frame';
+import { FrameDepartmentMgmt } from '../page/dm/frame';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -70,6 +71,10 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
                 case MENU_KEY.Home:
                     return (
                         <FrameHome />
+                    )
+                case MENU_KEY.DepartmentMgmt:
+                    return (
+                        <FrameDepartmentMgmt />
                     )
                 case MENU_KEY.EmployeeFile:
                     return (

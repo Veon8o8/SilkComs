@@ -6,7 +6,6 @@ import i18n from './i18n' // i18n配置
 import './App.css'
 
 // 自定义组件
-import { AuthLogin } from './page/auth.login';
 import { MainFrame } from './region/main.frame';
 // 自定义常量
 import { DYNAMIC, HEADER, USER } from './config/layout';
