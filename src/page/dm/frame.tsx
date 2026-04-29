@@ -62,7 +62,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
     handleSave = () => {
         const { editingDepartment, dataSource } = this.state;
         const form = this.formRef.current;
-        
+
         form.validateFields().then((values: any) => {
             if (editingDepartment) {
                 // 编辑部门
@@ -150,13 +150,6 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         });
     };
 
-    // 重置搜索
-    handleReset = () => {
-        this.setState({ searchName: '' }, () => {
-            this.actionRef.current?.reload();
-        });
-    };
-
     // 渲染操作列
     renderActions = (_: any, record: DepartmentType) => {
         return (
@@ -186,7 +179,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
     // 表格列配置
     getColumns = (): ProColumns<DepartmentType>[] => {
         const { t } = this.props;
-        
+
         return [
             {
                 title: 'ID',
@@ -241,8 +234,8 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         return (
             <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
                 <Col>
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         icon={<PlusOutlined />}
                         onClick={this.showAddModal}
                     >
@@ -262,9 +255,6 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                             }}
                             style={{ width: 200 }}
                         />
-                        <Button onClick={this.handleReset}>
-                            重置
-                        </Button>
                     </Space>
                 </Col>
             </Row>
