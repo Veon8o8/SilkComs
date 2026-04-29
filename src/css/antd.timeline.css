@@ -1,0 +1,19 @@
+/* 覆盖默认的 Timeline 间距 */
+.ant-timeline {
+    padding-left: 8px;
+    /* 调整整体 Timeline 的左边距 */
+}
+
+/* 调整每个 Timeline.Item 的间距 */
+.ant-timeline-item {
+    padding-bottom: 8px;
+    /* 调整每个 item 的底部间距 */
+}
+
+.ant-timeline .ant-timeline-item-last>.ant-timeline-item-content {
+    min-height: 0px;
+}
+
+.ant-collapse .ant-collapse-content>.ant-collapse-content-box {
+    padding: 18px 8px 0px 8px;
+}

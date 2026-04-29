@@ -1,0 +1,27 @@
+{
+    "modal": "对话框",
+    "confirm": "确定",
+    "cancel": "取消",
+    "info": "信息",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "search-condition": "搜索条件",
+    "time-range": "时间范围",
+    "start-time": "开始时间",
+    "end-time": "结束时间",
+    "pls-wait": "请等待数据返回...",
+    "no-data": "没有数据！",
+    "more": "更多",
+    "date": "日期",
+
+    "menu" : {
+        "vertical": "弹出式",
+        "inline": "嵌入式"
+    },
+    "menu.vertical": "弹出式",
+    "menu.inline": "嵌入式",
+
+    "front-page": "首页",
+    "employee-file": "员工档案"
+}

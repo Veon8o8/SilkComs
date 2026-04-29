@@ -1,0 +1,14 @@
+
+
+
+export const ERR_CODE = {
+    NULL_TOKEN: 10012,
+    WRONG_TOKEN: 10013,
+    TOKEN_EXPIRED: 10051,
+}
+
+export const ERR_TOKEN = [
+    ERR_CODE.NULL_TOKEN,
+    ERR_CODE.WRONG_TOKEN,
+    ERR_CODE.TOKEN_EXPIRED,
+]
