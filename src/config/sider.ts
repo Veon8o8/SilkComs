@@ -7,8 +7,10 @@ export const MENU_KEY = {
     // 首页
     Home: "Home",
 
-    // 部门管理
-    DepartmentMgmt: "DepartmentMgmt",
+    // 部门与职位管理
+    DepartmentPosition: "DepartmentPosition",
+    // // 部门管理
+    // DepartmentMgmt: "DepartmentMgmt",
 
     // 员工档案
     EmployeeFile: "EmployeeFile",
@@ -17,7 +19,7 @@ export const MENU_KEY = {
 /** 主菜单项 */
 export const MENU = [
     { key: MENU_KEY.Home, label: 'front-page' },
-    { key: MENU_KEY.DepartmentMgmt, label: 'department-mgmt' },
+    { key: MENU_KEY.DepartmentPosition, label: 'department-position' },
     { key: MENU_KEY.EmployeeFile, label: 'employee-file' },
 ];
 

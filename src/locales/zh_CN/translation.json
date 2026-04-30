@@ -14,6 +14,10 @@
     "no-data": "没有数据！",
     "more": "更多",
     "date": "日期",
+    "add": "添加",
+    "people.count": "人数",
+    "operation": "操作",
+    "create.time": "创建时间",
 
     "menu" : {
         "vertical": "弹出式",
@@ -24,8 +28,12 @@
 
     "front-page": "首页",
     "employee-file": "员工档案",
+    "department-position": "部门与岗位",
     "department-mgmt": "部门管理",
     "department.name": "部门名称",
+    "department.parent": "上级部门",
     "department.count": "人数",
-    "department.operation": "操作"
+    "department.operation": "操作",
+    "position-mgmt": "岗位管理",
+    "position.name": "岗位名称"
 }

@@ -3,10 +3,12 @@
 // 配置: 服务器接口
 
 /** 服务器地址 */
-export const HOST = 'http://140.143.97.54'
+// export const HOST = 'http://140.143.97.54'
+export const HOST = 'http://localhost'
 /** 服务器端口 */
 // export const PORT = ':51801'
-export const PORT = ''
+// export const PORT = ''
+export const PORT = ':3002'
 
 /** 页面路由根路径 */
 export const ROOT = `/mgmt`
@@ -47,17 +49,17 @@ export const UserApi = {
 }
 
 
-/** 任务管理接口(task). */
-export const TaskApi = {
-    /** 获取任务列表 */
-    LIST: `${URL}/admin/task/list`,
-    /** 下架任务 */
-    OFF_SHELF: `${URL}/admin/task/offShelf`,
-    /** 上架任务 */
-    ON_SHELF: `${URL}/admin/task/onShelf`,
-    /** 获取任务详情 */
-    DETAIL: `${URL}/admin/task/detail`,
-}
+// /** 任务管理接口(task). */
+// export const TaskApi = {
+//     /** 获取任务列表 */
+//     LIST: `${URL}/admin/task/list`,
+//     /** 下架任务 */
+//     OFF_SHELF: `${URL}/admin/task/offShelf`,
+//     /** 上架任务 */
+//     ON_SHELF: `${URL}/admin/task/onShelf`,
+//     /** 获取任务详情 */
+//     DETAIL: `${URL}/admin/task/detail`,
+// }
 
 /** 动态管理接口(dynamic). */
 export const DynamicApi = {
@@ -65,4 +67,16 @@ export const DynamicApi = {
     LIST_ADMIN: `${URL}/admin/dynamic/listAdmin`,
     /** 获取用户动态 */
     LIST_USER: `${URL}/admin/dynamic/listUser`,
+}
+
+/** 部门管理接口(department). */
+export const DepartmentApi = {
+    /** 获取部门列表 */
+    LIST: `${URL}/coms/department/list`,
+    /** 创建新部门 */
+    ADD: `${URL}/coms/department/add`,
+    /** 编辑部门 */
+    EDIT: `${URL}/coms/department/edit`,
+    /** 删除部门 */
+    DEL: `${URL}/coms/department/del`,
 }

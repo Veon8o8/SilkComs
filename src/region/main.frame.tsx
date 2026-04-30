@@ -12,7 +12,9 @@ import { MENU_KEY } from '../config/sider';
 import { strUtil } from '../utils/StrUtil';
 import { FrameHome } from '../page/home/frame';
 import { FrameEmployeeFile } from '../page/ef/frame';
-import { FrameDepartmentMgmt } from '../page/dm/frame';
+// import { FrameDepartmentMgmt } from '../page/dp/dm/frame';
+import { FrameDepartmentPosition } from '../page/dp/frame';
+import { LOCAL_STORAGE } from '../config/keys';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -47,6 +49,19 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
         };
     }
 
+    componentDidMount() {
+        // 这里可以添加一些初始化逻辑，比如获取用户信息、加载系统模块数据等
+        const params = new URLSearchParams(window.location.search);
+        const token:string = params.get('token') || '';
+        localStorage.setItem('token', token);
+        // const token = localStorage.getItem(LOCAL_STORAGE.TOKEN)
+        console.log('用户Token:', token);
+        if (!token) {
+            // 如果没有Token，说明用户未登录，重定向到登录页
+            window.location.href = 'http://localhost:5173/mgmt/login';
+        }
+    }
+
     render() {
         const { headerHeight, bodyHeight, colorBgContainer, borderRadiusLG } = this.props
 
@@ -72,9 +87,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
                     return (
                         <FrameHome />
                     )
-                case MENU_KEY.DepartmentMgmt:
+                case MENU_KEY.DepartmentPosition:
                     return (
-                        <FrameDepartmentMgmt />
+                        <FrameDepartmentPosition />
                     )
                 case MENU_KEY.EmployeeFile:
                     return (

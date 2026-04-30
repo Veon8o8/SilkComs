@@ -4,6 +4,7 @@
 
 2. 员工自助工作台 (Employee Self-Service Workbench)
 
+2. 部门与岗位 (Department Position): [dp](./dp/ReadMe.md)
 2. 部门管理 (Department Mgmt): [dm](./dm/ReadMe.md)
 
 3. 员工档案 (Employee File): [ef](./ef/ReadMe.md)
