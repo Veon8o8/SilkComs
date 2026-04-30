@@ -8,6 +8,7 @@ import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import React, { createRef } from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons/lib/icons';
+import { timeUtil } from '../../../utils/TimeUtil';
 
 interface FramePositionMgmtProps {
 }
@@ -17,12 +18,13 @@ interface PositionType {
     id: number;
     name: string;
     count: number;
+    createTime: string;
 }
 
 // 模拟初始数据
 const initData: PositionType[] = [
-    { id: 1, name: '负责人', count: 1 },
-    { id: 2, name: '工作人员', count: 5 },
+    { id: 1, name: '负责人', count: 1, createTime: timeUtil.formatDate(new Date()) },
+    { id: 2, name: '工作人员', count: 5, createTime: timeUtil.formatDate(new Date()) },
 ];
 
 interface _FramePositionMgmtState {
@@ -76,6 +78,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                     id: this.getNextId(),
                     name: values.name,
                     count: values.count,
+                    createTime: timeUtil.formatDate(new Date()),
                 };
                 this.setState({ dataSource: [...dataSource, newDepartment] }, () => {
                     message.success('添加成功');
@@ -179,9 +182,9 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
             {
                 title: 'ID',
                 dataIndex: 'id',
-                valueType: 'index',
+                valueType: 'text',
                 search: false,
-                width: 80,
+                width: 40,
             },
             {
                 title: t('position.name'),
@@ -190,11 +193,10 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 search: false, // 禁用默认搜索，使用自定义搜索框
             },
             {
-                title: t('people.count'),
-                dataIndex: 'count',
-                valueType: 'digit',
-                search: false,
-                width: 100,
+                title: t('create.time'),
+                dataIndex: 'createTime',
+                valueType: 'text',
+                search: false, // 禁用默认搜索，使用自定义搜索框
             },
             {
                 title: t('operation'),
