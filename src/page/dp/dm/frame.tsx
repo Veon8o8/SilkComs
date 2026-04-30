@@ -19,7 +19,7 @@ interface FrameDepartmentMgmtProps {
 
 // 定义部门数据类型
 interface DepartmentType {
-    id: number;
+    depId: number;
     name: string;
     count: number;
     parentId: number;
@@ -29,7 +29,7 @@ interface DepartmentType {
 
 // 模拟初始数据
 const initData: DepartmentType[] = [
-    { id: 1, name: '公司', count: 0, parentId: 0, parentName: '', createTime: timeUtil.formatDate(new Date()) },
+    { depId: 1, name: '公司', count: 0, parentId: 0, parentName: '', createTime: timeUtil.formatDate(new Date()) },
 ];
 
 interface _FrameDepartmentMgmtState {
@@ -72,7 +72,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
             for (let i = 0; i < list.length; i++) {
                 const item = list[i]
                 dataSource.push({
-                    id: item.id,
+                    depId: item.depId,
                     name: item.name,
                     count: item.count || 0,
                     parentId: item.parentId || 0,
@@ -82,13 +82,11 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
             }
             this.setState({ dataSource: dataSource });
         }
-    };
-
-    // 获取下一个可用ID
-    getNextId = (): number => {
-        const { dataSource } = this.state;
-        const maxId = Math.max(...dataSource.map(item => item.id), 0);
-        return maxId + 1;
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`获取部门列表失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+        }
     };
 
     // 保存部门（新增或编辑）
@@ -96,12 +94,12 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         const { editingDepartment, dataSource } = this.state;
         const form = this.formRef.current;
 
-        form.validateFields().then((values: any) => {
+        form.validateFields().then(async (values: any) => {
             if (editingDepartment) {
                 // 编辑部门
-                this.editDepartment(editingDepartment.id, values.name);
+                this.editDepartment(editingDepartment.depId, values.name);
                 const updatedData = dataSource.map(item =>
-                    item.id === editingDepartment.id
+                    item.depId === editingDepartment.depId
                         ? { ...item, ...values }
                         : item
                 );
@@ -111,11 +109,15 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                 });
             } else {
                 // 新增部门
-                this.addDepartment(values.name);
+                let result = await this.addDepartment(values.name);
+                if (!result) {
+                    message.error('添加失败');
+                    return;
+                }
                 const newDepartment: DepartmentType = {
-                    id: this.getNextId(),
+                    depId: result.depId,
                     name: values.name,
-                    count: values.count,
+                    count: 0,
                     parentId: 0,
                     parentName: '',
                     createTime: timeUtil.formatDate(new Date()),
@@ -147,10 +149,11 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         else if ((response?.code == 400)) {
             const r = response as ErrResponse
             console.error(`编辑部门失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
         }
     };
 
-    addDepartment = async (name: string) => {
+    addDepartment = async (name: string): Promise<{ depId: number } | false> => {
         // 这里去请求服务器
         const params = {
             token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
@@ -160,10 +163,12 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         if (response?.code == 200) {
             const r = response as SucResponse
             console.log(`添加部门成功: ${r.data}`);
+            return { depId: r.data.depId }
         }
         else if ((response?.code == 400)) {
             const r = response as ErrResponse
             console.error(`添加部门失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
             // const msgOnModal = `[${r.errCode}]: ${r.errMsg}`
             // 弹框警示错误
             // showInfo()
@@ -171,13 +176,19 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
             // showError()
             // showWarning()
             // this.setState({ errMsg: msgOnModal })
+            return false
         }
+        return false
     };
 
     // 删除部门
-    handleDelete = (id: number) => {
+    handleDelete = async (id: number) => {
+        const result = await this.delDepartment(id);
+        if (!result) return;
+
+        // 删除成功后更新前端数据源
         const { dataSource } = this.state;
-        const updatedData = dataSource.filter(item => item.id !== id);
+        const updatedData = dataSource.filter(item => item.depId !== id);
         this.setState({ dataSource: updatedData }, () => {
             message.success('删除成功');
             this.actionRef.current?.reload();
@@ -194,10 +205,13 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         if (response?.code == 200) {
             const r = response as SucResponse
             console.log(`删除部门成功: ${r.data}`);
+            return true
         }
         else if ((response?.code == 400)) {
             const r = response as ErrResponse
             console.error(`删除部门失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+            return false
         }
     };
 
@@ -263,7 +277,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                 </Button>
                 <Popconfirm
                     title="确定要删除这个部门吗？"
-                    onConfirm={() => this.handleDelete(record.id)}
+                    onConfirm={() => this.handleDelete(record.depId)}
                     okText="确定"
                     cancelText="取消"
                 >
@@ -282,10 +296,10 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
         return [
             {
                 title: 'ID',
-                dataIndex: 'id',
-                valueType: 'index',
+                dataIndex: 'depId',
+                valueType: 'text',
                 search: false,
-                width: 80,
+                width: 40,
             },
             {
                 title: t('department.name'),
@@ -305,13 +319,6 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                 valueType: 'text',
                 search: false, // 禁用默认搜索，使用自定义搜索框
             },
-            // {
-            //     title: t('department.count'),
-            //     dataIndex: 'count',
-            //     valueType: 'digit',
-            //     search: false,
-            //     width: 100,
-            // },
             {
                 title: t('department.operation'),
                 valueType: 'option',
@@ -404,20 +411,6 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                     >
                         <Input placeholder="请输入部门名称" />
                     </Form.Item>
-                    <Form.Item
-                        name="count"
-                        label="人数"
-                        rules={[
-                            { required: true, message: '请输入人数' },
-                            { type: 'number', min: 0, message: '人数不能小于0' },
-                        ]}
-                    >
-                        <InputNumber
-                            placeholder="请输入人数"
-                            style={{ width: '100%' }}
-                            min={0}
-                        />
-                    </Form.Item>
                 </Form>
             </Modal>
         );
@@ -431,7 +424,7 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                 {this.renderSearchBar()}
                 <ProTable<DepartmentType>
                     actionRef={this.actionRef}
-                    rowKey="id"
+                    rowKey="depId"
                     columns={columns}
                     request={this.request}
                     search={false}

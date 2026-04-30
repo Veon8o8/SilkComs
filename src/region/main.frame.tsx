@@ -15,6 +15,7 @@ import { FrameEmployeeFile } from '../page/ef/frame';
 // import { FrameDepartmentMgmt } from '../page/dp/dm/frame';
 import { FrameDepartmentPosition } from '../page/dp/frame';
 import { LOCAL_STORAGE } from '../config/keys';
+import { httpUtil } from '../utils/HttpUtil';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -58,8 +59,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
         console.log('用户Token:', token);
         if (!token) {
             // 如果没有Token，说明用户未登录，重定向到登录页
-            window.location.href = 'http://localhost:5173/mgmt/login';
+            httpUtil.gotoLogin();
         }
+        // TODO: 校验 token 是否过期
     }
 
     render() {

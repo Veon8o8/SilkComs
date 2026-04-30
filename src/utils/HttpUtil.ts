@@ -35,6 +35,17 @@ class HttpUtil {
         }
     }
 
+    gotoLogin() {
+        window.location.href = 'http://localhost:5173/mgmt/login';
+    }
+
+    tryGotoLogin(r: ErrResponse) {
+        if (r.errCode == 10051) {// Token过期，跳转登录界面
+            // 跳转到登录页面
+            this.gotoLogin();
+        }
+    }
+
 }
 
 export const httpUtil = new HttpUtil
