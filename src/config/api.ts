@@ -92,3 +92,11 @@ export const PositionApi = {
     /** 删除岗位 */
     DEL: `${URL}/coms/position/del`,
 }
+
+/** 员工管理接口(employee). */
+export const EmployeeApi = {
+    LIST: `${URL}/coms/employee/list`,
+    ADD: `${URL}/coms/employee/add`,
+    EDIT: `${URL}/coms/employee/edit`,
+    DEL: `${URL}/coms/employee/del`,
+}
