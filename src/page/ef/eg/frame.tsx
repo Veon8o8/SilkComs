@@ -13,6 +13,7 @@ import { EmployeeApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
 import { ErrResponse, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
+import AddEmployeeModal from './add.modal';
 
 interface FrameEmployeeGalleryProps {
 }
@@ -116,15 +117,60 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         }
     };
 
-    // 保存员工（新增或编辑）
+    // // 保存员工（新增或编辑）
+    // handleSave = () => {
+    //     const { editingEmployee, dataSource } = this.state;
+    //     const form = this.formRef.current;
+
+    //     form.validateFields().then(async (values: any) => {
+    //         if (editingEmployee) {
+    //             // 编辑员工
+    //             await this.editEmployee(editingEmployee.id, values);
+    //             const updatedData = dataSource.map(item =>
+    //                 item.id === editingEmployee.id
+    //                     ? { ...item, ...values }
+    //                     : item
+    //             );
+    //             this.setState({ dataSource: updatedData }, () => {
+    //                 message.success('编辑成功');
+    //                 this.actionRef.current?.reload();
+    //             });
+    //         } else {
+    //             // 新增员工
+    //             let result = await this.addEmployee(values);
+    //             if (!result) {
+    //                 message.error('添加失败');
+    //                 return;
+    //             }
+    //             const newEmployee: EmployeeType = {
+    //                 id: result.id,
+    //                 code: values.code,
+    //                 name: values.name,
+    //                 department: values.department,
+    //                 status: values.status,
+    //                 position: values.position,
+    //                 createTime: timeUtil.formatDate(new Date()),
+    //             };
+    //             this.setState({ dataSource: [...dataSource, newEmployee] }, () => {
+    //                 message.success('添加成功');
+    //                 this.actionRef.current?.reload();
+    //             });
+    //         }
+    //         this.setState({ modalVisible: false, editingEmployee: null });
+    //         form.resetFields();
+    //     }).catch((error: any) => {
+    //         console.error('表单验证失败:', error);
+    //     });
+    // };
+
+    // 保存员工（新增或编辑）- 本地版本
     handleSave = () => {
         const { editingEmployee, dataSource } = this.state;
         const form = this.formRef.current;
 
-        form.validateFields().then(async (values: any) => {
+        form.validateFields().then((values: any) => {
             if (editingEmployee) {
-                // 编辑员工
-                await this.editEmployee(editingEmployee.id, values);
+                // 编辑员工 - 本地编辑
                 const updatedData = dataSource.map(item =>
                     item.id === editingEmployee.id
                         ? { ...item, ...values }
@@ -135,26 +181,29 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                     this.actionRef.current?.reload();
                 });
             } else {
-                // 新增员工
-                let result = await this.addEmployee(values);
-                if (!result) {
-                    message.error('添加失败');
-                    return;
-                }
+                // 新增员工 - 本地新增
+                // 生成模拟 ID（使用时间戳 + 随机数）
+                const newId = Date.now().toString() + Math.random().toString(36).substr(2, 6);
+
                 const newEmployee: EmployeeType = {
-                    id: result.id,
-                    code: values.code,
+                    id: newId,
+                    code: values.code || `FR${String(dataSource.length + 1).padStart(5, '0')}`, // 自动生成工号
                     name: values.name,
                     department: values.department,
                     status: values.status,
                     position: values.position,
                     createTime: timeUtil.formatDate(new Date()),
                 };
-                this.setState({ dataSource: [...dataSource, newEmployee] }, () => {
+
+                this.setState({
+                    dataSource: [...dataSource, newEmployee]
+                }, () => {
                     message.success('添加成功');
                     this.actionRef.current?.reload();
                 });
             }
+
+            // 关闭弹框并重置表单
             this.setState({ modalVisible: false, editingEmployee: null });
             form.resetFields();
         }).catch((error: any) => {
@@ -585,6 +634,13 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
 
     // 渲染模态框
     renderModal = () => {
+        // return (
+        //     <AddEmployeeModal
+        //         visible={this.state.modalVisible}
+        //         onCancel={this.handleModalCancel}
+        //         onOk={this.handleSave}
+        //     />
+        // );
         const { modalVisible, editingEmployee } = this.state;
         const { t } = this.props;
 
@@ -672,6 +728,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 {this.renderSearchBar()}
                 {this.renderDepartmentBar()}
                 {this.renderGalleryView()}
+                {this.renderModal()}
             </Card>
         );
     }
