@@ -591,7 +591,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                         >
                             添加
                         </Button>
-                        <Button
+                        {/* <Button
                             icon={<ExportOutlined />}
                             onClick={this.handleExport}
                         >
@@ -608,7 +608,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                             onClick={this.handleHistory}
                         >
                             操作记录
-                        </Button>
+                        </Button> */}
                     </Space>
                 </Col>
                 <Col>
@@ -624,7 +624,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                             }}
                             style={{ width: 200 }}
                         />
-                        <Button icon={<SearchOutlined />}>筛选</Button>
+                        {/* <Button icon={<SearchOutlined />}>筛选</Button> */}
                     </Space>
                 </Col>
             </Row>

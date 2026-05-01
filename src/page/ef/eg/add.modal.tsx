@@ -87,7 +87,6 @@ interface AddEmployeeModalState {
 
 class AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmployeeModalState> {
     private topFieldsRef = React.createRef<HTMLDivElement>();
-    private tabsContainerRef = React.createRef<HTMLDivElement>();
 
     constructor(props: AddEmployeeModalProps) {
         super(props);
@@ -631,9 +630,10 @@ class AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploye
                     }}
                     style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
-                    {/* <div style={{ flexShrink: 0 }}> */}
-                    {this.renderTopFields()}
-                    {/* </div> */}
+                    {/* 禁止该 flex 项目在容器空间不足时被压缩。 */}
+                    <div style={{ flexShrink: 0 }}>
+                        {this.renderTopFields()}
+                    </div>
                     {this.renderTabContent()}
                 </Form>
             </Modal>
