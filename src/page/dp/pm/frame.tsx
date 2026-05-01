@@ -1,6 +1,6 @@
 // src/page/dm/frame.tsx
 
-// 部门管理框架
+// 岗位管理框架
 
 import { Button, Popconfirm, Space, message, Modal, Form, Input, InputNumber, Row, Col } from 'antd';
 import Card from 'antd/lib/card/Card';
@@ -13,7 +13,7 @@ import { timeUtil } from '../../../utils/TimeUtil';
 interface FramePositionMgmtProps {
 }
 
-// 定义部门数据类型
+// 定义岗位数据类型
 interface PositionType {
     id: number;
     name: string;
@@ -55,14 +55,14 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         return maxId + 1;
     };
 
-    // 保存部门（新增或编辑）
+    // 保存岗位（新增或编辑）
     handleSave = () => {
         const { editingDepartment, dataSource } = this.state;
         const form = this.formRef.current;
 
         form.validateFields().then((values: any) => {
             if (editingDepartment) {
-                // 编辑部门
+                // 编辑岗位
                 const updatedData = dataSource.map(item =>
                     item.id === editingDepartment.id
                         ? { ...item, ...values }
@@ -73,11 +73,11 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                     this.actionRef.current?.reload();
                 });
             } else {
-                // 新增部门
+                // 新增岗位
                 const newDepartment: PositionType = {
                     id: this.getNextId(),
                     name: values.name,
-                    count: values.count,
+                    count: values.count || 0,
                     createTime: timeUtil.formatDate(new Date()),
                 };
                 this.setState({ dataSource: [...dataSource, newDepartment] }, () => {
@@ -92,7 +92,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         });
     };
 
-    // 删除部门
+    // 删除岗位
     handleDelete = (id: number) => {
         const { dataSource } = this.state;
         const updatedData = dataSource.filter(item => item.id !== id);
@@ -161,7 +161,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                     编辑
                 </Button>
                 <Popconfirm
-                    title="确定要删除这个部门吗？"
+                    title="确定要删除这个岗位吗？"
                     onConfirm={() => this.handleDelete(record.id)}
                     okText="确定"
                     cancelText="取消"
@@ -243,7 +243,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 <Col>
                     <Space>
                         <Input.Search
-                            placeholder="请输入部门名称"
+                            placeholder="请输入岗位名称"
                             allowClear
                             onSearch={this.handleSearch}
                             onChange={(e) => {
@@ -265,7 +265,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
 
         return (
             <Modal
-                title={editingDepartment ? '编辑部门' : '新增部门'}
+                title={editingDepartment ? '编辑岗位' : '新增岗位'}
                 open={modalVisible}
                 onOk={this.handleSave}
                 onCancel={this.handleModalCancel}
@@ -282,27 +282,13 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 >
                     <Form.Item
                         name="name"
-                        label="部门名称"
+                        label="岗位名称"
                         rules={[
-                            { required: true, message: '请输入部门名称' },
-                            { max: 50, message: '部门名称不能超过50个字符' },
+                            { required: true, message: '请输入岗位名称' },
+                            { max: 50, message: '岗位名称不能超过50个字符' },
                         ]}
                     >
-                        <Input placeholder="请输入部门名称" />
-                    </Form.Item>
-                    <Form.Item
-                        name="count"
-                        label="人数"
-                        rules={[
-                            { required: true, message: '请输入人数' },
-                            { type: 'number', min: 0, message: '人数不能小于0' },
-                        ]}
-                    >
-                        <InputNumber
-                            placeholder="请输入人数"
-                            style={{ width: '100%' }}
-                            min={0}
-                        />
+                        <Input placeholder="请输入岗位名称" />
                     </Form.Item>
                 </Form>
             </Modal>
