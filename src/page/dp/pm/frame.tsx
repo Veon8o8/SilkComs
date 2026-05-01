@@ -221,15 +221,22 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
 
     // 打开编辑模态框
     showEditModal = (record: PositionType) => {
-        const form = this.formRef.current;
-        if (form) {
-            form.setFieldsValue({
-                name: record.name,
-            });
-        }
+        const TAG = `PositionMgmt.showEditModal()`;
+
         this.setState({
             editingPosition: record,
             modalVisible: true,
+        }, () => {
+            // Modal 渲染完成后再设置表单值
+            const form = this.formRef.current;
+            if (form) {
+                console.log(TAG, '编辑岗位，设置表单初始值:', record);
+                form.setFieldsValue({
+                    name: record.name,
+                });
+            } else {
+                console.warn(TAG, '表单实例未找到，无法设置初始值');
+            }
         });
     };
 
@@ -379,9 +386,6 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 <Form
                     ref={this.formRef}
                     layout="vertical"
-                    initialValues={{
-                        name: '',
-                    }}
                 >
                     <Form.Item
                         name="name"

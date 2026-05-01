@@ -229,18 +229,19 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
 
     // 打开编辑模态框
     showEditModal = (record: DepartmentType) => {
-        const form = this.formRef.current;
-        if (form) {
-            form.setFieldsValue({
-                name: record.name,
-                count: record.count,
-                parentId: record.parentId,
-                parentName: record.parentName,
-            });
-        }
         this.setState({
             editingDepartment: record,
             modalVisible: true,
+        }, () => {
+            const form = this.formRef.current;
+            if (form) {
+                form.setFieldsValue({
+                    name: record.name,
+                    count: record.count,
+                    parentId: record.parentId,
+                    parentName: record.parentName,
+                });
+            }
         });
     };
 
@@ -396,10 +397,6 @@ class _FrameDepartmentMgmt extends React.Component<WithTranslation & FrameDepart
                 <Form
                     ref={this.formRef}
                     layout="vertical"
-                    initialValues={{
-                        name: '',
-                        count: 0,
-                    }}
                 >
                     <Form.Item
                         name="name"
