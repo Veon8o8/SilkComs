@@ -3,13 +3,12 @@
 import React from 'react';
 import { Modal, Form, Input, Select, DatePicker, Row, Col, Button, Tabs, message, Upload } from 'antd';
 import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined } from '@ant-design/icons';
-import type { FormInstance } from 'antd/es/form';
 import dayjs from 'dayjs';
 import type { UploadFile } from 'antd/es/upload/interface';
+import { withTranslation } from 'react-i18next';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
-const { TextArea } = Input;
 
 // 部门列表
 const departmentList = [
@@ -78,6 +77,7 @@ interface AddEmployeeModalProps {
     onOk: (values: AddEmployeeFormData) => void;
     loading?: boolean;
     formRef: React.RefObject<any>;
+    constentHeiht: string;
 }
 
 interface AddEmployeeModalState {
@@ -85,7 +85,7 @@ interface AddEmployeeModalState {
     photoFileList: UploadFile[];
 }
 
-class AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmployeeModalState> {
+class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmployeeModalState> {
     private topFieldsRef = React.createRef<HTMLDivElement>();
 
     constructor(props: AddEmployeeModalProps) {
@@ -612,10 +612,9 @@ class AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploye
                 width={700}
                 destroyOnClose
                 confirmLoading={loading}
-                style={{ top: 40 }}
+                style={{ top: '40px' }}
                 bodyStyle={{
-                    height: '80vh',
-                    padding: '16px',
+                    height: `calc(100% - 80px)`,
                     overflow: 'hidden'
                 }}
             >
@@ -641,4 +640,4 @@ class AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploye
     }
 }
 
-export default AddEmployeeModal;
+export const AddEmployeeModal = withTranslation()(_AddEmployeeModal);

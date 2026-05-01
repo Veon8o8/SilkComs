@@ -13,8 +13,8 @@ import { EmployeeApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
 import { ErrResponse, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
-import AddEmployeeModal from './add.modal';
 import { CONTENT } from '../../../config/layout';
+import { AddEmployeeModal } from './add.modal';
 
 interface FrameEmployeeGalleryProps {
     headerHeight: number;
@@ -641,6 +641,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 visible={this.state.modalVisible}
                 onCancel={this.handleModalCancel}
                 onOk={this.handleSave}
+                constentHeiht={this.contentHeight}
             />
         );
     };
@@ -654,7 +655,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 variant="borderless"
                 style={{
                     width: "100%",
-                    height: `calc(100vh - ${headerHeight}vh - ${CONTENT.PADDING * 4}px)`,  // 为什么减去4个CONTENT.PADDING？因为外层Layout还有一个CONTENT.PADDING的padding，而Content组件又有一个CONTENT.PADDING的padding，所以总共要减去4个CONTENT.PADDING
+                    height: this.contentHeight,
                     display: "flex",
                     flexDirection: "column"
                 }}
@@ -671,6 +672,13 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 {this.renderModal()}
             </Card>
         );
+    }
+
+    get contentHeight() {
+        const { headerHeight } = this.props;
+        // 为什么减去4个CONTENT.PADDING？因为外层Layout还有一个CONTENT.PADDING的padding，
+        // 而Content组件又有一个CONTENT.PADDING的padding，所以总共要减去4个CONTENT.PADDING
+        return `calc(100vh - ${headerHeight}vh - ${CONTENT.PADDING * 4}px)`;
     }
 }
 
