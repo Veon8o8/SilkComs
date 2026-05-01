@@ -14,8 +14,10 @@ import { httpUtil } from '../../../utils/HttpUtil';
 import { ErrResponse, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 import AddEmployeeModal from './add.modal';
+import { CONTENT } from '../../../config/layout';
 
 interface FrameEmployeeGalleryProps {
+    headerHeight: number;
 }
 
 // 定义员工数据类型
@@ -477,7 +479,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         const { departments, activeDepartment } = this.state;
 
         return (
-            <Card style={{ marginBottom: 16 }}>
+            <Card style={{ marginBottom: 16, flexShrink: 0 }}>
                 <Space size="middle" wrap>
                     {departments.map(dept => (
                         <Button
@@ -521,7 +523,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         });
 
         return (
-            <div>
+            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '8px' }}>
                 {Object.entries(grouped).map(([department, empList]) => (
                     <Card
                         key={department}
@@ -581,7 +583,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         const { t } = this.props;
 
         return (
-            <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+            <Row justify="space-between" align="middle" style={{ marginBottom: 16, flexShrink: 0 }}>
                 <Col>
                     <Space>
                         <Button
@@ -644,8 +646,25 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
     };
 
     render() {
+        const { headerHeight } = this.props;
+        console.log(`FrameEmployeeGallery render - headerHeight:`, headerHeight);
         return (
-            <Card title="员工画廊" variant="borderless" style={{ width: "100%", height: "100%" }}>
+            <Card
+                title="员工画廊"
+                variant="borderless"
+                style={{
+                    width: "100%",
+                    height: `calc(100vh - ${headerHeight}vh - ${CONTENT.PADDING * 4}px)`,  // 为什么减去4个CONTENT.PADDING？因为外层Layout还有一个CONTENT.PADDING的padding，而Content组件又有一个CONTENT.PADDING的padding，所以总共要减去4个CONTENT.PADDING
+                    display: "flex",
+                    flexDirection: "column"
+                }}
+                bodyStyle={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden"
+                }}
+            >
                 {this.renderSearchBar()}
                 {this.renderDepartmentBar()}
                 {this.renderGalleryView()}

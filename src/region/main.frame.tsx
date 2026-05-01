@@ -53,7 +53,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
     componentDidMount() {
         // 这里可以添加一些初始化逻辑，比如获取用户信息、加载系统模块数据等
         const params = new URLSearchParams(window.location.search);
-        const token:string = params.get('token') || '';
+        const token: string = params.get('token') || '';
         localStorage.setItem('token', token);
         // const token = localStorage.getItem(LOCAL_STORAGE.TOKEN)
         console.log('用户Token:', token);
@@ -95,7 +95,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
                     )
                 case MENU_KEY.EmployeeFile:
                     return (
-                        <FrameEmployeeFile />
+                        <FrameEmployeeFile
+                            headerHeight={headerHeight}
+                        />
                     )
                 default:
                     return (
@@ -126,7 +128,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
                     <Layout style={{ padding: `${CONTENT.PADDING}px` }}>
                         <Content
                             style={{
-                                padding: CONTENT.PADDING,
+                                padding: `${CONTENT.PADDING}px`,
                                 background: colorBgContainer,
                                 borderRadius: borderRadiusLG,
                             }}
