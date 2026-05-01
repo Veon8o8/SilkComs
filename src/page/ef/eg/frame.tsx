@@ -2,7 +2,7 @@
 
 // 员工画廊
 
-import { Button, Space, message, Modal, Form, Input, Select, Tag, Row, Col, Card as AntCard, Avatar } from 'antd';
+import { Button, Space, message, Modal, Form, Input, Select, Tag, Row, Col, Card as AntCard, Avatar, FormInstance } from 'antd';
 import Card from 'antd/lib/card/Card';
 import { ActionType, ProColumns } from '@ant-design/pro-components';
 import React, { createRef } from 'react';
@@ -117,7 +117,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         }
     };
 
-    // // 保存员工（新增或编辑）
+    // // 保存员工（新增或编辑）- 服务器交互版本
     // handleSave = () => {
     //     const { editingEmployee, dataSource } = this.state;
     //     const form = this.formRef.current;
@@ -164,51 +164,50 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
     // };
 
     // 保存员工（新增或编辑）- 本地版本
-    handleSave = () => {
+    handleSave = (values: any) => {
+
         const { editingEmployee, dataSource } = this.state;
         const form = this.formRef.current;
 
-        form.validateFields().then((values: any) => {
-            if (editingEmployee) {
-                // 编辑员工 - 本地编辑
-                const updatedData = dataSource.map(item =>
-                    item.id === editingEmployee.id
-                        ? { ...item, ...values }
-                        : item
-                );
-                this.setState({ dataSource: updatedData }, () => {
-                    message.success('编辑成功');
-                    this.actionRef.current?.reload();
-                });
-            } else {
-                // 新增员工 - 本地新增
-                // 生成模拟 ID（使用时间戳 + 随机数）
-                const newId = Date.now().toString() + Math.random().toString(36).substr(2, 6);
+        // form.validateFields().then((values: any) => {
+        console.log('=============表单验证成功，提交数据:', values);
+        if (editingEmployee) {
+            // 编辑员工 - 本地编辑
+            const updatedData = dataSource.map(item =>
+                item.id === editingEmployee.id
+                    ? { ...item, ...values }
+                    : item
+            );
+            this.setState({ dataSource: updatedData }, () => {
+                message.success('编辑成功');
+                this.actionRef.current?.reload();
+            });
+        } else {
+            // 新增员工 - 本地新增
+            // 生成模拟 ID（使用时间戳 + 随机数）
+            const newId = Date.now().toString() + Math.random().toString(36).substr(2, 6);
 
-                const newEmployee: EmployeeType = {
-                    id: newId,
-                    code: values.code || `FR${String(dataSource.length + 1).padStart(5, '0')}`, // 自动生成工号
-                    name: values.name,
-                    department: values.department,
-                    status: values.status,
-                    position: values.position,
-                    createTime: timeUtil.formatDate(new Date()),
-                };
+            const newEmployee: EmployeeType = {
+                id: newId,
+                code: values.code || `FR${String(dataSource.length + 1).padStart(5, '0')}`, // 自动生成工号
+                name: values.name,
+                department: values.department,
+                status: values.status,
+                position: values.position,
+                createTime: timeUtil.formatDate(new Date()),
+            };
 
-                this.setState({
-                    dataSource: [...dataSource, newEmployee]
-                }, () => {
-                    message.success('添加成功');
-                    this.actionRef.current?.reload();
-                });
-            }
+            this.setState({
+                dataSource: [...dataSource, newEmployee]
+            }, () => {
+                message.success('添加成功');
+                this.actionRef.current?.reload();
+            });
+        }
 
-            // 关闭弹框并重置表单
-            this.setState({ modalVisible: false, editingEmployee: null });
-            form.resetFields();
-        }).catch((error: any) => {
-            console.error('表单验证失败:', error);
-        });
+        // 关闭弹框并重置表单
+        this.setState({ modalVisible: false, editingEmployee: null });
+        form.resetFields();
     };
 
     editEmployee = async (id: string, values: any) => {
@@ -634,91 +633,13 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
 
     // 渲染模态框
     renderModal = () => {
-        // return (
-        //     <AddEmployeeModal
-        //         visible={this.state.modalVisible}
-        //         onCancel={this.handleModalCancel}
-        //         onOk={this.handleSave}
-        //     />
-        // );
-        const { modalVisible, editingEmployee } = this.state;
-        const { t } = this.props;
-
         return (
-            <Modal
-                title={editingEmployee ? '编辑员工' : '新增员工'}
-                open={modalVisible}
-                onOk={this.handleSave}
+            <AddEmployeeModal
+                formRef={this.formRef}
+                visible={this.state.modalVisible}
                 onCancel={this.handleModalCancel}
-                okText="保存"
-                cancelText="取消"
-                width={500}
-            >
-                <Form
-                    ref={this.formRef}
-                    layout="vertical"
-                >
-                    <Form.Item
-                        name="code"
-                        label="工号"
-                        rules={[
-                            { required: true, message: '请输入工号' },
-                        ]}
-                    >
-                        <Input placeholder="请输入工号" />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="name"
-                        label="姓名"
-                        rules={[
-                            { required: true, message: '请输入姓名' },
-                        ]}
-                    >
-                        <Input placeholder="请输入姓名" />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="department"
-                        label="部门"
-                        rules={[
-                            { required: true, message: '请选择部门' },
-                        ]}
-                    >
-                        <Select placeholder="请选择部门">
-                            <Select.Option value="总经办">总经办</Select.Option>
-                            <Select.Option value="销售部">销售部</Select.Option>
-                            <Select.Option value="仓储部">仓储部</Select.Option>
-                            <Select.Option value="采购部">采购部</Select.Option>
-                            <Select.Option value="生产部">生产部</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                        name="status"
-                        label="员工状态"
-                        rules={[
-                            { required: true, message: '请选择员工状态' },
-                        ]}
-                    >
-                        <Select placeholder="请选择员工状态">
-                            <Select.Option value="在职">在职</Select.Option>
-                            <Select.Option value="离职">离职</Select.Option>
-                            <Select.Option value="休假">休假</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                        name="position"
-                        label="岗位"
-                        rules={[
-                            { required: true, message: '请输入岗位' },
-                        ]}
-                    >
-                        <Input placeholder="请输入岗位" />
-                    </Form.Item>
-                </Form>
-            </Modal>
+                onOk={this.handleSave}
+            />
         );
     };
 
