@@ -80,3 +80,15 @@ export const DepartmentApi = {
     /** 删除部门 */
     DEL: `${URL}/coms/department/del`,
 }
+
+/** 岗位管理接口(position). */
+export const PositionApi = {
+    /** 获取岗位列表 */
+    LIST: `${URL}/coms/position/list`,
+    /** 创建新岗位 */
+    ADD: `${URL}/coms/position/add`,
+    /** 编辑岗位 */
+    EDIT: `${URL}/coms/position/edit`,
+    /** 删除岗位 */
+    DEL: `${URL}/coms/position/del`,
+}

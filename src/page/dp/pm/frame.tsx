@@ -8,6 +8,10 @@ import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import React, { createRef } from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons/lib/icons';
+import { LOCAL_STORAGE } from '../../../config/keys';
+import { PositionApi } from '../../../config/api';
+import { httpUtil } from '../../../utils/HttpUtil';
+import { ErrResponse, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 
 interface FramePositionMgmtProps {
@@ -15,7 +19,7 @@ interface FramePositionMgmtProps {
 
 // 定义岗位数据类型
 interface PositionType {
-    id: number;
+    positionId: number;
     name: string;
     count: number;
     createTime: string;
@@ -23,14 +27,15 @@ interface PositionType {
 
 // 模拟初始数据
 const initData: PositionType[] = [
-    { id: 1, name: '负责人', count: 1, createTime: timeUtil.formatDate(new Date()) },
-    { id: 2, name: '工作人员', count: 5, createTime: timeUtil.formatDate(new Date()) },
+    { positionId: 1, name: '产品经理', count: 3, createTime: timeUtil.formatDate(new Date()) },
+    { positionId: 2, name: '前端工程师', count: 5, createTime: timeUtil.formatDate(new Date()) },
+    { positionId: 3, name: '后端工程师', count: 4, createTime: timeUtil.formatDate(new Date()) },
 ];
 
 interface _FramePositionMgmtState {
     dataSource: PositionType[];
     modalVisible: boolean;
-    editingDepartment: PositionType | null;
+    editingPosition: PositionType | null;
     searchName: string;
 }
 
@@ -43,29 +48,57 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         this.state = {
             dataSource: initData,
             modalVisible: false,
-            editingDepartment: null,
+            editingPosition: null,
             searchName: '',
         };
     }
 
-    // 获取下一个可用ID
-    getNextId = (): number => {
-        const { dataSource } = this.state;
-        const maxId = Math.max(...dataSource.map(item => item.id), 0);
-        return maxId + 1;
+    componentDidMount(): void {
+        this.listPositions();
+    }
+
+    listPositions = async () => {
+        // 这里去请求服务器
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+        }
+        let response = await httpUtil.post(PositionApi.LIST, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`获取岗位列表成功:\n`, r.data.list);
+            // 设置 dataSource
+            const list = r.data.list
+            const dataSource: PositionType[] = []
+            for (let i = 0; i < list.length; i++) {
+                const item = list[i]
+                dataSource.push({
+                    positionId: item.positionId,
+                    name: item.name,
+                    count: item.count || 0,
+                    createTime: timeUtil.formatTimestamp(item.createTime),
+                })
+            }
+            this.setState({ dataSource: dataSource });
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`获取岗位列表失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+        }
     };
 
     // 保存岗位（新增或编辑）
     handleSave = () => {
-        const { editingDepartment, dataSource } = this.state;
+        const { editingPosition, dataSource } = this.state;
         const form = this.formRef.current;
 
-        form.validateFields().then((values: any) => {
-            if (editingDepartment) {
+        form.validateFields().then(async (values: any) => {
+            if (editingPosition) {
                 // 编辑岗位
+                await this.editPosition(editingPosition.positionId, values.name);
                 const updatedData = dataSource.map(item =>
-                    item.id === editingDepartment.id
-                        ? { ...item, ...values }
+                    item.positionId === editingPosition.positionId
+                        ? { ...item, name: values.name }
                         : item
                 );
                 this.setState({ dataSource: updatedData }, () => {
@@ -74,32 +107,104 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 });
             } else {
                 // 新增岗位
-                const newDepartment: PositionType = {
-                    id: this.getNextId(),
+                let result = await this.addPosition(values.name);
+                if (!result) {
+                    message.error('添加失败');
+                    return;
+                }
+                const newPosition: PositionType = {
+                    positionId: result.id,
                     name: values.name,
-                    count: values.count || 0,
+                    count: 0,
                     createTime: timeUtil.formatDate(new Date()),
                 };
-                this.setState({ dataSource: [...dataSource, newDepartment] }, () => {
+                this.setState({ dataSource: [...dataSource, newPosition] }, () => {
                     message.success('添加成功');
                     this.actionRef.current?.reload();
                 });
             }
-            this.setState({ modalVisible: false, editingDepartment: null });
+            this.setState({ modalVisible: false, editingPosition: null });
             form.resetFields();
         }).catch((error: any) => {
             console.error('表单验证失败:', error);
         });
     };
 
+    editPosition = async (id: number, name: string) => {
+        // 这里去请求服务器
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            id: id,
+            name: name,
+        }
+        let response = await httpUtil.post(PositionApi.EDIT, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`编辑岗位成功: ${r.data}`);
+            return true
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`编辑岗位失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+            return false
+        }
+        return false
+    };
+
+    addPosition = async (name: string): Promise<{ id: number } | false> => {
+        // 这里去请求服务器
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            name: name,
+        }
+        let response = await httpUtil.post(PositionApi.ADD, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`添加岗位成功: ${r.data}`);
+            return { id: r.data.id }
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`添加岗位失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+            return false
+        }
+        return false
+    };
+
     // 删除岗位
-    handleDelete = (id: number) => {
+    handleDelete = async (id: number) => {
+        const result = await this.delPosition(id);
+        if (!result) return;
+
+        // 删除成功后更新前端数据源
         const { dataSource } = this.state;
-        const updatedData = dataSource.filter(item => item.id !== id);
+        const updatedData = dataSource.filter(item => item.positionId !== id);
         this.setState({ dataSource: updatedData }, () => {
             message.success('删除成功');
             this.actionRef.current?.reload();
         });
+    };
+
+    delPosition = async (id: number) => {
+        // 这里去请求服务器
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            id: id,
+        }
+        let response = await httpUtil.post(PositionApi.DEL, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`删除岗位成功: ${r.data}`);
+            return true
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`删除岗位失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+            return false
+        }
     };
 
     // 打开新增模态框
@@ -109,7 +214,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
             form.resetFields();
         }
         this.setState({
-            editingDepartment: null,
+            editingPosition: null,
             modalVisible: true,
         });
     };
@@ -120,11 +225,10 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         if (form) {
             form.setFieldsValue({
                 name: record.name,
-                count: record.count,
             });
         }
         this.setState({
-            editingDepartment: record,
+            editingPosition: record,
             modalVisible: true,
         });
     };
@@ -137,7 +241,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         }
         this.setState({
             modalVisible: false,
-            editingDepartment: null,
+            editingPosition: null,
         });
     };
 
@@ -162,7 +266,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 </Button>
                 <Popconfirm
                     title="确定要删除这个岗位吗？"
-                    onConfirm={() => this.handleDelete(record.id)}
+                    onConfirm={() => this.handleDelete(record.positionId)}
                     okText="确定"
                     cancelText="取消"
                 >
@@ -181,25 +285,25 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         return [
             {
                 title: 'ID',
-                dataIndex: 'id',
+                dataIndex: 'positionId',
                 valueType: 'text',
                 search: false,
                 width: 40,
             },
             {
-                title: t('position.name'),
+                title: t('position.name') || '岗位名称',
                 dataIndex: 'name',
                 valueType: 'text',
-                search: false, // 禁用默认搜索，使用自定义搜索框
+                search: false,
             },
             {
                 title: t('create.time'),
                 dataIndex: 'createTime',
                 valueType: 'text',
-                search: false, // 禁用默认搜索，使用自定义搜索框
+                search: false,
             },
             {
-                title: t('operation'),
+                title: t('department.operation'),
                 valueType: 'option',
                 width: 150,
                 render: this.renderActions,
@@ -261,11 +365,11 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
 
     // 渲染模态框
     renderModal = () => {
-        const { modalVisible, editingDepartment } = this.state;
+        const { modalVisible, editingPosition } = this.state;
 
         return (
             <Modal
-                title={editingDepartment ? '编辑岗位' : '新增岗位'}
+                title={editingPosition ? '编辑岗位' : '新增岗位'}
                 open={modalVisible}
                 onOk={this.handleSave}
                 onCancel={this.handleModalCancel}
@@ -277,7 +381,6 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                     layout="vertical"
                     initialValues={{
                         name: '',
-                        count: 0,
                     }}
                 >
                     <Form.Item
@@ -303,7 +406,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 {this.renderSearchBar()}
                 <ProTable<PositionType>
                     actionRef={this.actionRef}
-                    rowKey="id"
+                    rowKey="positionId"
                     columns={columns}
                     request={this.request}
                     search={false}
