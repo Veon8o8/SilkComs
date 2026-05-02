@@ -12,10 +12,12 @@ import { MENU_KEY } from '../config/sider';
 import { strUtil } from '../utils/StrUtil';
 import { FrameHome } from '../page/home/frame';
 import { FrameEmployeeFile } from '../page/ef/frame';
-// import { FrameDepartmentMgmt } from '../page/dp/dm/frame';
 import { FrameDepartmentPosition } from '../page/dp/frame';
-import { LOCAL_STORAGE } from '../config/keys';
 import { httpUtil } from '../utils/HttpUtil';
+import { DepartmentApi, PositionApi } from '../config/api';
+import { LOCAL_STORAGE } from '../config/keys';
+import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../config/type';
+import { timeUtil } from '../utils/TimeUtil';
 const { Content } = Layout;
 
 type MenuMode = 'vertical' | 'inline';
@@ -29,7 +31,16 @@ interface MainFrameProps<> {
     borderRadiusLG: string,
 }
 
-class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { itemKey: string, menuMode: MenuMode, taskId: number, accountId: number }> {
+interface MainFrameState {
+    itemKey: string,
+    menuMode: MenuMode,
+    taskId: number,
+    accountId: number,
+    departmentList: DepartmentType[],
+    positionList: PositionType[],
+}
+
+class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainFrameState> {
 
     private childRef = React.createRef<_MainSider>()
 
@@ -47,6 +58,8 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
             menuMode: 'inline',
             taskId: 0,
             accountId: 0,
+            departmentList: [],
+            positionList: [],
         };
     }
 
@@ -62,6 +75,71 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
             httpUtil.gotoLogin();
         }
         // TODO: 校验 token 是否过期
+
+        // 请求服务器，获取部门和岗位数据，供员工档案页面使用
+        this.fetchDepartment();
+        this.fetchPosition();
+    }
+
+    private async fetchDepartment() {
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+        }
+        let response = await httpUtil.post(DepartmentApi.LIST, params);
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`获取部门列表成功:\n`, r.data.list);
+            // 设置 dataSource
+            const list = r.data.list
+            const dataSource: DepartmentType[] = []
+            for (let i = 0; i < list.length; i++) {
+                const item = list[i]
+                dataSource.push({
+                    depId: item.depId,
+                    name: item.name,
+                    count: item.count || 0,
+                    parentId: item.parentId || 0,
+                    parentName: item.parentName || '-',
+                    createTime: timeUtil.formatTimestamp(item.createTime),
+                })
+            }
+            this.setState({ departmentList: dataSource });
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`获取部门列表失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+        }
+    }
+
+    private async fetchPosition() {
+        // 这里去请求服务器
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+        }
+        let response = await httpUtil.post(PositionApi.LIST, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`获取岗位列表成功:\n`, r.data.list);
+            // 设置 dataSource
+            const list = r.data.list
+            const dataSource: PositionType[] = []
+            for (let i = 0; i < list.length; i++) {
+                const item = list[i]
+                dataSource.push({
+                    positionId: item.positionId,
+                    name: item.name,
+                    count: item.count || 0,
+                    createTime: timeUtil.formatTimestamp(item.createTime),
+                })
+            }
+            this.setState({ positionList: dataSource });
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`获取岗位列表失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+        }
     }
 
     render() {
@@ -97,6 +175,8 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, { ite
                     return (
                         <FrameEmployeeFile
                             headerHeight={headerHeight}
+                            departmentList={this.state.departmentList}
+                            positionList={this.state.positionList}
                         />
                     )
                 default:

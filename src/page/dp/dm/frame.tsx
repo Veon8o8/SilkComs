@@ -11,20 +11,10 @@ import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons/li
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { DepartmentApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
-import { ErrResponse, SucResponse } from '../../../config/type';
+import { DepartmentType, ErrResponse, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 
 interface FrameDepartmentMgmtProps {
-}
-
-// 定义部门数据类型
-interface DepartmentType {
-    depId: number;
-    name: string;
-    count: number;
-    parentId: number;
-    parentName: string;
-    createTime: string;
 }
 
 // 模拟初始数据

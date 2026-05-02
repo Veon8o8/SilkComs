@@ -11,13 +11,15 @@ import { PlusOutlined, ExportOutlined, DeleteOutlined, HistoryOutlined, SearchOu
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { EmployeeApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
-import { ErrResponse, SucResponse } from '../../../config/type';
+import { ErrResponse, PositionType, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 import { CONTENT } from '../../../config/layout';
 import { AddEmployeeModal } from './add.modal';
 
 interface FrameEmployeeGalleryProps {
     headerHeight: number;
+    departmentList: DepartmentType[],
+    positionList: PositionType[],
 }
 
 // 定义员工数据类型
@@ -50,13 +52,13 @@ const initData: EmployeeType[] = [
     { id: '9', code: 'FR00015', name: '何成斌', department: '生产部', status: '在职', position: '生产组工作人员', createTime: timeUtil.formatDate(new Date()) },
 ];
 
-const initDepartments: DepartmentType[] = [
-    { name: '总经办', count: 1 },
-    { name: '销售部', count: 2 },
-    { name: '仓储部', count: 2 },
-    { name: '采购部', count: 2 },
-    { name: '生产部', count: 2 },
-];
+// const initDepartments: DepartmentType[] = [
+//     { name: '总经办', count: 1 },
+//     { name: '销售部', count: 2 },
+//     { name: '仓储部', count: 2 },
+//     { name: '采购部', count: 2 },
+//     { name: '生产部', count: 2 },
+// ];
 
 interface _FrameEmployeeGalleryState {
     dataSource: EmployeeType[];
@@ -73,9 +75,11 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
 
     constructor(props: any) {
         super(props);
+        const { departmentList } = this.props
         this.state = {
             dataSource: initData,
-            departments: initDepartments,
+            departments: departmentList,
+            // departments: initDepartments,
             modalVisible: false,
             editingEmployee: null,
             searchName: '',
@@ -635,13 +639,17 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
 
     // 渲染模态框
     renderModal = () => {
+        const { departmentList, positionList } = this.props;
         return (
             <AddEmployeeModal
-                formRef={this.formRef}
                 visible={this.state.modalVisible}
                 onCancel={this.handleModalCancel}
                 onOk={this.handleSave}
+                loading={false}
+                formRef={this.formRef}
                 constentHeiht={this.contentHeight}
+                departmentList={departmentList}
+                positionList={positionList}
             />
         );
     };

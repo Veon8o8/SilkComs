@@ -6,21 +6,23 @@ import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined, Thunderbol
 import dayjs from 'dayjs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { withTranslation } from 'react-i18next';
+import { DepartmentType } from '../../../config/type';
+import { PositionType } from 'antd/es/image/style';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-// 部门列表
-const departmentList = [
-    { id: '1', name: '总经办' },
-    { id: '2', name: '销售部' },
-    { id: '3', name: '仓储部' },
-    { id: '4', name: '采购部' },
-    { id: '5', name: '生产部' },
-    { id: '6', name: '技术部' },
-    { id: '7', name: '财务部' },
-    { id: '8', name: '人力资源部' },
-];
+// // 部门列表
+// const departmentList = [
+//     { id: '1', name: '总经办' },
+//     { id: '2', name: '销售部' },
+//     { id: '3', name: '仓储部' },
+//     { id: '4', name: '采购部' },
+//     { id: '5', name: '生产部' },
+//     { id: '6', name: '技术部' },
+//     { id: '7', name: '财务部' },
+//     { id: '8', name: '人力资源部' },
+// ];
 
 // 岗位列表（根据部门可能不同，这里提供通用岗位）
 const positionList = [
@@ -78,6 +80,8 @@ interface AddEmployeeModalProps {
     loading?: boolean;
     formRef: React.RefObject<any>;
     constentHeiht: string;
+    departmentList: DepartmentType[],
+    positionList: PositionType[],
 }
 
 interface AddEmployeeModalState {
@@ -164,66 +168,66 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
 
     // 随机填充表单
     autoFillForm = () => {
-        const { formRef } = this.props;
+        const { formRef, departmentList } = this.props;
         const form = formRef.current;
         if (!form) return;
 
         // 随机生成工号
         const randomCode = `FR${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`;
-        
+
         // 随机姓名
         const surnames = ['张', '王', '李', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
         const givenNames = ['伟', '芳', '娜', '敏', '静', '涛', '军', '强', '鹏', '宇'];
-        const randomName = surnames[Math.floor(Math.random() * surnames.length)] + 
-                          givenNames[Math.floor(Math.random() * givenNames.length)];
-        
+        const randomName = surnames[Math.floor(Math.random() * surnames.length)] +
+            givenNames[Math.floor(Math.random() * givenNames.length)];
+
         // 随机部门
         const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].name;
-        
+
         // 随机岗位
         const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].name;
-        
+
         // 随机性别
         const randomGender = Math.random() > 0.5 ? '男' : '女';
-        
+
         // 随机出生日期 (1970-2000)
         const randomBirthDate = this.generateRandomDate(new Date('1970-01-01'), new Date('2000-12-31'));
-        
+
         // 随机婚姻状态
         const maritalStatusList = ['未婚', '已婚', '离异', '丧偶'];
         const randomMaritalStatus = maritalStatusList[Math.floor(Math.random() * maritalStatusList.length)];
-        
+
         // 随机政治面貌
         const politicalList = ['中共党员', '中共预备党员', '共青团员', '民主党派', '无党派人士', '群众'];
         const randomPolitical = politicalList[Math.floor(Math.random() * politicalList.length)];
-        
+
         // 随机民族
         const ethnicList = ['汉族', '苗族', '彝族', '壮族', '回族', '满族', '藏族'];
         const randomEthnicity = ethnicList[Math.floor(Math.random() * ethnicList.length)];
-        
+
         // 随机手机号
         const randomPhone = `1${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
-        
+
         // 随机聘用形式
         const employmentTypeList = ['全职', '兼职', '实习', '劳务派遣'];
         const randomEmploymentType = employmentTypeList[Math.floor(Math.random() * employmentTypeList.length)];
-        
+
         // 随机员工状态
         const employeeStatusList = ['在职', '试用期', '待岗'];
         const randomEmployeeStatus = employeeStatusList[Math.floor(Math.random() * employeeStatusList.length)];
-        
+
         // 随机日期
         const randomWorkStartDate = this.generateRandomDate(new Date('2010-01-01'), new Date('2020-12-31'));
         const randomEntryDate = this.generateRandomDate(new Date('2021-01-01'), new Date('2024-12-31'));
         const randomRegularDate = dayjs(randomEntryDate).add(90, 'day').toDate();
-        
+
         // 随机薪资 (3000-30000)
         const randomProbationSalary = Math.floor(Math.random() * (10000 - 3000) + 3000);
         const randomFormalSalary = randomProbationSalary + Math.floor(Math.random() * 5000);
-        
+
         // 随机试用期天数
         const randomProbationDays = [30, 60, 90, 180][Math.floor(Math.random() * 4)];
-        
+
         // 随机地址
         const cities = ['成都市', '绵阳市', '宜宾市', '泸州市', '德阳市'];
         const districts = ['高新区', '武侯区', '青羊区', '锦江区', '金牛区'];
@@ -236,7 +240,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             name: randomName,
             department: randomDept,
             position: randomPosition,
-            
+
             // 基本信息
             idCard: this.generateIdCard(),
             gender: randomGender,
@@ -249,11 +253,11 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             politicalStatus: randomPolitical,
             emergencyContact: `张${Math.floor(Math.random() * 100)}`,
             emergencyPhone: randomPhone,
-            
+
             // 通讯信息
             phone: randomPhone,
             permanentAddress: `${randomAddress}某某街道${Math.floor(Math.random() * 200) + 1}号`,
-            
+
             // 用工信息
             employmentType: randomEmploymentType,
             employeeStatus: randomEmployeeStatus,
@@ -264,13 +268,14 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             probationSalary: randomProbationSalary,
             formalSalary: randomFormalSalary,
         };
-        
+
         form.setFieldsValue(formValues);
         message.success('已随机填充表单数据');
     };
 
     // 渲染顶部公共字段
     renderTopFields = () => {
+        const { departmentList } = this.props;
         return (
             <div
                 ref={this.topFieldsRef}
@@ -315,7 +320,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 optionFilterProp="children"
                             >
                                 {departmentList.map(dept => (
-                                    <Option key={dept.id} value={dept.name}>
+                                    <Option key={dept.depId} value={dept.name}>
                                         {dept.name}
                                     </Option>
                                 ))}
@@ -731,9 +736,9 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                 title={
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>新增员工</span>
-                        <Button 
-                            size="small" 
-                            icon={<ThunderboltOutlined />} 
+                        <Button
+                            size="small"
+                            icon={<ThunderboltOutlined />}
                             onClick={this.autoFillForm}
                             style={{ marginRight: 24 }}
                         >

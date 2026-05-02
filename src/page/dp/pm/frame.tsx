@@ -11,19 +11,13 @@ import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons/li
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { PositionApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
-import { ErrResponse, SucResponse } from '../../../config/type';
+import { ErrResponse, PositionType, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 
 interface FramePositionMgmtProps {
 }
 
-// 定义岗位数据类型
-interface PositionType {
-    positionId: number;
-    name: string;
-    count: number;
-    createTime: string;
-}
+
 
 // 模拟初始数据
 const initData: PositionType[] = [
