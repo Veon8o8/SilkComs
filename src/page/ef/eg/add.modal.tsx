@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Modal, Form, Input, Select, DatePicker, Row, Col, Button, Tabs, message, Upload } from 'antd';
-import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined } from '@ant-design/icons';
+import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { withTranslation } from 'react-i18next';
@@ -145,6 +145,130 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         this.setState({ photoFileList: fileList });
     };
 
+    // 随机生成身份证号
+    generateIdCard = () => {
+        const areaCode = '510101';
+        const birthDate = this.generateRandomDate(new Date('1970-01-01'), new Date('2000-12-31'));
+        const birthStr = dayjs(birthDate).format('YYYYMMDD');
+        const sequence = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+        const idCard17 = areaCode + birthStr + sequence;
+        // 简单的校验码计算（实际应该用标准算法，这里简化）
+        const checkCode = Math.floor(Math.random() * 10).toString();
+        return idCard17 + checkCode;
+    };
+
+    // 生成随机日期
+    generateRandomDate = (start: Date, end: Date): Date => {
+        return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    };
+
+    // 随机填充表单
+    autoFillForm = () => {
+        const { formRef } = this.props;
+        const form = formRef.current;
+        if (!form) return;
+
+        // 随机生成工号
+        const randomCode = `FR${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`;
+        
+        // 随机姓名
+        const surnames = ['张', '王', '李', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
+        const givenNames = ['伟', '芳', '娜', '敏', '静', '涛', '军', '强', '鹏', '宇'];
+        const randomName = surnames[Math.floor(Math.random() * surnames.length)] + 
+                          givenNames[Math.floor(Math.random() * givenNames.length)];
+        
+        // 随机部门
+        const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].name;
+        
+        // 随机岗位
+        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].name;
+        
+        // 随机性别
+        const randomGender = Math.random() > 0.5 ? '男' : '女';
+        
+        // 随机出生日期 (1970-2000)
+        const randomBirthDate = this.generateRandomDate(new Date('1970-01-01'), new Date('2000-12-31'));
+        
+        // 随机婚姻状态
+        const maritalStatusList = ['未婚', '已婚', '离异', '丧偶'];
+        const randomMaritalStatus = maritalStatusList[Math.floor(Math.random() * maritalStatusList.length)];
+        
+        // 随机政治面貌
+        const politicalList = ['中共党员', '中共预备党员', '共青团员', '民主党派', '无党派人士', '群众'];
+        const randomPolitical = politicalList[Math.floor(Math.random() * politicalList.length)];
+        
+        // 随机民族
+        const ethnicList = ['汉族', '苗族', '彝族', '壮族', '回族', '满族', '藏族'];
+        const randomEthnicity = ethnicList[Math.floor(Math.random() * ethnicList.length)];
+        
+        // 随机手机号
+        const randomPhone = `1${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
+        
+        // 随机聘用形式
+        const employmentTypeList = ['全职', '兼职', '实习', '劳务派遣'];
+        const randomEmploymentType = employmentTypeList[Math.floor(Math.random() * employmentTypeList.length)];
+        
+        // 随机员工状态
+        const employeeStatusList = ['在职', '试用期', '待岗'];
+        const randomEmployeeStatus = employeeStatusList[Math.floor(Math.random() * employeeStatusList.length)];
+        
+        // 随机日期
+        const randomWorkStartDate = this.generateRandomDate(new Date('2010-01-01'), new Date('2020-12-31'));
+        const randomEntryDate = this.generateRandomDate(new Date('2021-01-01'), new Date('2024-12-31'));
+        const randomRegularDate = dayjs(randomEntryDate).add(90, 'day').toDate();
+        
+        // 随机薪资 (3000-30000)
+        const randomProbationSalary = Math.floor(Math.random() * (10000 - 3000) + 3000);
+        const randomFormalSalary = randomProbationSalary + Math.floor(Math.random() * 5000);
+        
+        // 随机试用期天数
+        const randomProbationDays = [30, 60, 90, 180][Math.floor(Math.random() * 4)];
+        
+        // 随机地址
+        const cities = ['成都市', '绵阳市', '宜宾市', '泸州市', '德阳市'];
+        const districts = ['高新区', '武侯区', '青羊区', '锦江区', '金牛区'];
+        const randomAddress = `${cities[Math.floor(Math.random() * cities.length)]}/${districts[Math.floor(Math.random() * districts.length)]}`;
+
+        // 设置表单值
+        const formValues = {
+            // 顶部字段
+            code: randomCode,
+            name: randomName,
+            department: randomDept,
+            position: randomPosition,
+            
+            // 基本信息
+            idCard: this.generateIdCard(),
+            gender: randomGender,
+            birthDate: dayjs(randomBirthDate),
+            birthplace: randomAddress,
+            householdRegister: randomAddress,
+            householdType: ['农业户口', '非农业户口', '集体户口'][Math.floor(Math.random() * 3)],
+            ethnicity: randomEthnicity,
+            maritalStatus: randomMaritalStatus,
+            politicalStatus: randomPolitical,
+            emergencyContact: `张${Math.floor(Math.random() * 100)}`,
+            emergencyPhone: randomPhone,
+            
+            // 通讯信息
+            phone: randomPhone,
+            permanentAddress: `${randomAddress}某某街道${Math.floor(Math.random() * 200) + 1}号`,
+            
+            // 用工信息
+            employmentType: randomEmploymentType,
+            employeeStatus: randomEmployeeStatus,
+            workStartDate: dayjs(randomWorkStartDate),
+            entryDate: dayjs(randomEntryDate),
+            probationDays: randomProbationDays,
+            regularDate: dayjs(randomRegularDate),
+            probationSalary: randomProbationSalary,
+            formalSalary: randomFormalSalary,
+        };
+        
+        form.setFieldsValue(formValues);
+        message.success('已随机填充表单数据');
+    };
+
     // 渲染顶部公共字段
     renderTopFields = () => {
         return (
@@ -189,7 +313,6 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 placeholder="请选择部门"
                                 showSearch
                                 optionFilterProp="children"
-                            // onChange={this.handleDepartmentChange}
                             >
                                 {departmentList.map(dept => (
                                     <Option key={dept.id} value={dept.name}>
@@ -605,7 +728,19 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
 
         return (
             <Modal
-                title="新增员工"
+                title={
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>新增员工</span>
+                        <Button 
+                            size="small" 
+                            icon={<ThunderboltOutlined />} 
+                            onClick={this.autoFillForm}
+                            style={{ marginRight: 24 }}
+                        >
+                            随机填充
+                        </Button>
+                    </div>
+                }
                 open={visible}
                 onCancel={this.handleCancel}
                 footer={this.renderFooter()}
