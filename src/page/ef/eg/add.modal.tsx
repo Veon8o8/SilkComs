@@ -6,35 +6,10 @@ import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined, Thunderbol
 import dayjs from 'dayjs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { withTranslation } from 'react-i18next';
-import { DepartmentType } from '../../../config/type';
-import { PositionType } from 'antd/es/image/style';
+import { DepartmentType, PositionType } from '../../../config/type';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
-
-// // 部门列表
-// const departmentList = [
-//     { id: '1', name: '总经办' },
-//     { id: '2', name: '销售部' },
-//     { id: '3', name: '仓储部' },
-//     { id: '4', name: '采购部' },
-//     { id: '5', name: '生产部' },
-//     { id: '6', name: '技术部' },
-//     { id: '7', name: '财务部' },
-//     { id: '8', name: '人力资源部' },
-// ];
-
-// 岗位列表（根据部门可能不同，这里提供通用岗位）
-const positionList = [
-    { id: '1', name: '总经理' },
-    { id: '2', name: '部门经理' },
-    { id: '3', name: '主管' },
-    { id: '4', name: '专员' },
-    { id: '5', name: '工程师' },
-    { id: '6', name: '技术员' },
-    { id: '7', name: '助理' },
-    { id: '8', name: '实习生' },
-];
 
 // 定义员工新增表单数据类型
 export interface AddEmployeeFormData {
@@ -168,7 +143,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
 
     // 随机填充表单
     autoFillForm = () => {
-        const { formRef, departmentList } = this.props;
+        const { formRef, departmentList, positionList } = this.props;
         const form = formRef.current;
         if (!form) return;
 
@@ -182,10 +157,12 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             givenNames[Math.floor(Math.random() * givenNames.length)];
 
         // 随机部门
-        const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].name;
+        // const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].name;
+        const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].depId; // 传出参数就是ID
 
         // 随机岗位
-        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].name;
+        // const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].name;
+        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].positionId; // 传出参数就是ID
 
         // 随机性别
         const randomGender = Math.random() > 0.5 ? '男' : '女';
@@ -275,7 +252,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
 
     // 渲染顶部公共字段
     renderTopFields = () => {
-        const { departmentList } = this.props;
+        const { departmentList, positionList } = this.props;
         return (
             <div
                 ref={this.topFieldsRef}
@@ -320,7 +297,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 optionFilterProp="children"
                             >
                                 {departmentList.map(dept => (
-                                    <Option key={dept.depId} value={dept.name}>
+                                    <Option key={dept.depId} value={dept.depId}>  {/* 表单存储的是部门 ID，用户看到的是部门名 */}
                                         {dept.name}
                                     </Option>
                                 ))}
@@ -339,7 +316,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 optionFilterProp="children"
                             >
                                 {positionList.map(pos => (
-                                    <Option key={pos.id} value={pos.name}>
+                                    <Option key={pos.positionId} value={pos.positionId}> {/* 表单存储的是岗位 ID，用户看到的是岗位名 */}
                                         {pos.name}
                                     </Option>
                                 ))}

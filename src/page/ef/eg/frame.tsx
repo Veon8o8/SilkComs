@@ -11,7 +11,7 @@ import { PlusOutlined, ExportOutlined, DeleteOutlined, HistoryOutlined, SearchOu
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { EmployeeApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
-import { ErrResponse, PositionType, SucResponse } from '../../../config/type';
+import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 import { CONTENT } from '../../../config/layout';
 import { AddEmployeeModal } from './add.modal';
@@ -33,12 +33,6 @@ interface EmployeeType {
     createTime: string;
 }
 
-// 定义部门类型
-interface DepartmentType {
-    name: string;
-    count: number;
-}
-
 // 模拟初始数据
 const initData: EmployeeType[] = [
     { id: '1', code: 'FR00002', name: '游显和', department: '总经办', status: '在职', position: '总经理、数字化总监', createTime: timeUtil.formatDate(new Date()) },
@@ -51,14 +45,6 @@ const initData: EmployeeType[] = [
     { id: '8', code: 'FR00011', name: '段敏', department: '采购部', status: '在职', position: '采购部工作人员', createTime: timeUtil.formatDate(new Date()) },
     { id: '9', code: 'FR00015', name: '何成斌', department: '生产部', status: '在职', position: '生产组工作人员', createTime: timeUtil.formatDate(new Date()) },
 ];
-
-// const initDepartments: DepartmentType[] = [
-//     { name: '总经办', count: 1 },
-//     { name: '销售部', count: 2 },
-//     { name: '仓储部', count: 2 },
-//     { name: '采购部', count: 2 },
-//     { name: '生产部', count: 2 },
-// ];
 
 interface _FrameEmployeeGalleryState {
     dataSource: EmployeeType[];
