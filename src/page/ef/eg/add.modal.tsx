@@ -31,6 +31,7 @@ export interface AddEmployeeFormData {
     politicalStatus: string;      // 政治面貌
     employeePhoto?: string;        // 员工照片
     emergencyContact: string;      // 紧急联系人
+    emergencyRelationship: string; // 紧急联系人关系
     emergencyPhone: string;        // 紧急联系电话
 
     // 通讯信息
@@ -229,6 +230,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             maritalStatus: randomMaritalStatus,
             politicalStatus: randomPolitical,
             emergencyContact: `张${Math.floor(Math.random() * 100)}`,
+            emergencyRelationship: `朋友`,
             emergencyPhone: randomPhone,
 
             // 通讯信息
@@ -476,7 +478,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
 
                 {/* 紧急联系人 */}
                 <Row gutter={16}>
-                    <Col span={12}>
+                    <Col span={8}>
                         <Form.Item
                             name="emergencyContact"
                             label="紧急联系人"
@@ -484,7 +486,15 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                             <Input placeholder="请输入紧急联系人姓名" />
                         </Form.Item>
                     </Col>
-                    <Col span={12}>
+                    <Col span={8}>
+                        <Form.Item
+                            name="emergencyRelationship"
+                            label="紧急联系人关系"
+                        >
+                            <Input placeholder="请输入紧急联系人关系" />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
                         <Form.Item
                             name="emergencyPhone"
                             label="紧急联系电话"
