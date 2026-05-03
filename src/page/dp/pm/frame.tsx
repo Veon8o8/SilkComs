@@ -21,9 +21,9 @@ interface FramePositionMgmtProps {
 
 // 模拟初始数据
 const initData: PositionType[] = [
-    { positionId: 1, name: '产品经理', count: 3, createTime: timeUtil.formatDate(new Date()) },
-    { positionId: 2, name: '前端工程师', count: 5, createTime: timeUtil.formatDate(new Date()) },
-    { positionId: 3, name: '后端工程师', count: 4, createTime: timeUtil.formatDate(new Date()) },
+    { posId: 1, name: '产品经理', count: 3, createTime: timeUtil.formatDate(new Date()) },
+    { posId: 2, name: '前端工程师', count: 5, createTime: timeUtil.formatDate(new Date()) },
+    { posId: 3, name: '后端工程师', count: 4, createTime: timeUtil.formatDate(new Date()) },
 ];
 
 interface _FramePositionMgmtState {
@@ -66,7 +66,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
             for (let i = 0; i < list.length; i++) {
                 const item = list[i]
                 dataSource.push({
-                    positionId: item.positionId,
+                    posId: item.posId,
                     name: item.name,
                     count: item.count || 0,
                     createTime: timeUtil.formatTimestamp(item.createTime),
@@ -89,9 +89,9 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         form.validateFields().then(async (values: any) => {
             if (editingPosition) {
                 // 编辑岗位
-                await this.editPosition(editingPosition.positionId, values.name);
+                await this.editPosition(editingPosition.posId, values.name);
                 const updatedData = dataSource.map(item =>
-                    item.positionId === editingPosition.positionId
+                    item.posId === editingPosition.posId
                         ? { ...item, name: values.name }
                         : item
                 );
@@ -107,7 +107,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                     return;
                 }
                 const newPosition: PositionType = {
-                    positionId: result.id,
+                    posId: result.id,
                     name: values.name,
                     count: 0,
                     createTime: timeUtil.formatDate(new Date()),
@@ -174,7 +174,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
 
         // 删除成功后更新前端数据源
         const { dataSource } = this.state;
-        const updatedData = dataSource.filter(item => item.positionId !== id);
+        const updatedData = dataSource.filter(item => item.posId !== id);
         this.setState({ dataSource: updatedData }, () => {
             message.success('删除成功');
             this.actionRef.current?.reload();
@@ -267,7 +267,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 </Button>
                 <Popconfirm
                     title="确定要删除这个岗位吗？"
-                    onConfirm={() => this.handleDelete(record.positionId)}
+                    onConfirm={() => this.handleDelete(record.posId)}
                     okText="确定"
                     cancelText="取消"
                 >
@@ -286,7 +286,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
         return [
             {
                 title: 'ID',
-                dataIndex: 'positionId',
+                dataIndex: 'posId',
                 valueType: 'text',
                 search: false,
                 width: 40,
@@ -404,7 +404,7 @@ class _FramePositionMgmt extends React.Component<WithTranslation & FramePosition
                 {this.renderSearchBar()}
                 <ProTable<PositionType>
                     actionRef={this.actionRef}
-                    rowKey="positionId"
+                    rowKey="posId"
                     columns={columns}
                     request={this.request}
                     search={false}

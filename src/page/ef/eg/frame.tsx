@@ -55,6 +55,8 @@ interface _FrameEmployeeGalleryState {
     activeDepartment: string;
 }
 
+const CLS_NAME = `FrameEmployeeGallery`;
+
 class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmployeeGalleryProps, _FrameEmployeeGalleryState> {
     actionRef = createRef<ActionType>();
     formRef = React.createRef<any>();
@@ -109,62 +111,14 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         }
     };
 
-    // // 保存员工（新增或编辑）- 服务器交互版本
-    // handleSave = () => {
-    //     const { editingEmployee, dataSource } = this.state;
-    //     const form = this.formRef.current;
-
-    //     form.validateFields().then(async (values: any) => {
-    //         if (editingEmployee) {
-    //             // 编辑员工
-    //             await this.editEmployee(editingEmployee.id, values);
-    //             const updatedData = dataSource.map(item =>
-    //                 item.id === editingEmployee.id
-    //                     ? { ...item, ...values }
-    //                     : item
-    //             );
-    //             this.setState({ dataSource: updatedData }, () => {
-    //                 message.success('编辑成功');
-    //                 this.actionRef.current?.reload();
-    //             });
-    //         } else {
-    //             // 新增员工
-    //             let result = await this.addEmployee(values);
-    //             if (!result) {
-    //                 message.error('添加失败');
-    //                 return;
-    //             }
-    //             const newEmployee: EmployeeType = {
-    //                 id: result.id,
-    //                 code: values.code,
-    //                 name: values.name,
-    //                 department: values.department,
-    //                 status: values.status,
-    //                 position: values.position,
-    //                 createTime: timeUtil.formatDate(new Date()),
-    //             };
-    //             this.setState({ dataSource: [...dataSource, newEmployee] }, () => {
-    //                 message.success('添加成功');
-    //                 this.actionRef.current?.reload();
-    //             });
-    //         }
-    //         this.setState({ modalVisible: false, editingEmployee: null });
-    //         form.resetFields();
-    //     }).catch((error: any) => {
-    //         console.error('表单验证失败:', error);
-    //     });
-    // };
-
-    // 保存员工（新增或编辑）- 本地版本
-    handleSave = (values: any) => {
-
+    // 保存员工（新增或编辑）- 服务器交互版本
+    handleSave = async (values: any) => {
         const { editingEmployee, dataSource } = this.state;
         const form = this.formRef.current;
 
-        // form.validateFields().then((values: any) => {
-        console.log('=============表单验证成功，提交数据:', values);
         if (editingEmployee) {
-            // 编辑员工 - 本地编辑
+            // 编辑员工
+            await this.editEmployee(editingEmployee.id, values);
             const updatedData = dataSource.map(item =>
                 item.id === editingEmployee.id
                     ? { ...item, ...values }
@@ -175,32 +129,76 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 this.actionRef.current?.reload();
             });
         } else {
-            // 新增员工 - 本地新增
-            // 生成模拟 ID（使用时间戳 + 随机数）
-            const newId = Date.now().toString() + Math.random().toString(36).substr(2, 6);
-
-            const newEmployee: EmployeeType = {
-                id: newId,
-                code: values.code || `FR${String(dataSource.length + 1).padStart(5, '0')}`, // 自动生成工号
-                name: values.name,
-                department: values.department,
-                status: values.status,
-                position: values.position,
-                createTime: timeUtil.formatDate(new Date()),
-            };
-
-            this.setState({
-                dataSource: [...dataSource, newEmployee]
-            }, () => {
-                message.success('添加成功');
-                this.actionRef.current?.reload();
-            });
+            // 新增员工 - 上传服务器
+            let result = await this.addEmployee(values);
+            if (!result) {
+                message.error('添加失败');
+                return;
+            }
+            // const newEmployee: EmployeeType = {
+            //     id: result.id,
+            //     code: values.code,
+            //     name: values.name,
+            //     department: values.department,
+            //     status: values.status,
+            //     position: values.position,
+            //     createTime: timeUtil.formatDate(new Date()),
+            // };
+            // this.setState({ dataSource: [...dataSource, newEmployee] }, () => {
+            //     message.success('添加成功');
+            //     this.actionRef.current?.reload();
+            // });
         }
-
-        // 关闭弹框并重置表单
         this.setState({ modalVisible: false, editingEmployee: null });
         form.resetFields();
     };
+
+    // // 保存员工（新增或编辑）- 本地版本
+    // handleSave = (values: any) => {
+
+    //     const { editingEmployee, dataSource } = this.state;
+    //     const form = this.formRef.current;
+
+    //     // form.validateFields().then((values: any) => {
+    //     console.log('=============表单验证成功，提交数据:', values);
+    //     if (editingEmployee) {
+    //         // 编辑员工 - 本地编辑
+    //         const updatedData = dataSource.map(item =>
+    //             item.id === editingEmployee.id
+    //                 ? { ...item, ...values }
+    //                 : item
+    //         );
+    //         this.setState({ dataSource: updatedData }, () => {
+    //             message.success('编辑成功');
+    //             this.actionRef.current?.reload();
+    //         });
+    //     } else {
+    //         // 新增员工 - 本地新增
+    //         // 生成模拟 ID（使用时间戳 + 随机数）
+    //         const newId = Date.now().toString() + Math.random().toString(36).substr(2, 6);
+
+    //         const newEmployee: EmployeeType = {
+    //             id: newId,
+    //             code: values.code || `FR${String(dataSource.length + 1).padStart(5, '0')}`, // 自动生成工号
+    //             name: values.name,
+    //             department: values.department,
+    //             status: values.status,
+    //             position: values.position,
+    //             createTime: timeUtil.formatDate(new Date()),
+    //         };
+
+    //         this.setState({
+    //             dataSource: [...dataSource, newEmployee]
+    //         }, () => {
+    //             message.success('添加成功');
+    //             this.actionRef.current?.reload();
+    //         });
+    //     }
+
+    //     // 关闭弹框并重置表单
+    //     this.setState({ modalVisible: false, editingEmployee: null });
+    //     form.resetFields();
+    // };
 
     editEmployee = async (id: string, values: any) => {
         const params = {
@@ -224,9 +222,13 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
     };
 
     addEmployee = async (values: any): Promise<{ id: string } | false> => {
+        const TAG = `${CLS_NAME}.addEmployee() - `
+        console.log(TAG, '提交数据:', values);
         const params = {
             token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
             ...values,
+            depId: values.department,
+            posId: values.position,
         }
         let response = await httpUtil.post(EmployeeApi.ADD, params)
         if (response?.code == 200) {

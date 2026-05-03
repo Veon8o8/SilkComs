@@ -162,7 +162,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
 
         // 随机岗位
         // const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].name;
-        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].positionId; // 传出参数就是ID
+        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].posId; // 传出参数就是ID
 
         // 随机性别
         const randomGender = Math.random() > 0.5 ? '男' : '女';
@@ -183,7 +183,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         const randomEthnicity = ethnicList[Math.floor(Math.random() * ethnicList.length)];
 
         // 随机手机号
-        const randomPhone = `1${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
+        const randomPhone = `1${Math.floor(Math.random() * 7) + 3}${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
 
         // 随机聘用形式
         const employmentTypeList = ['全职', '兼职', '实习', '劳务派遣'];
@@ -316,7 +316,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 optionFilterProp="children"
                             >
                                 {positionList.map(pos => (
-                                    <Option key={pos.positionId} value={pos.positionId}> {/* 表单存储的是岗位 ID，用户看到的是岗位名 */}
+                                    <Option key={pos.posId} value={pos.posId}> {/* 表单存储的是岗位 ID，用户看到的是岗位名 */}
                                         {pos.name}
                                     </Option>
                                 ))}

@@ -127,7 +127,7 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             for (let i = 0; i < list.length; i++) {
                 const item = list[i]
                 dataSource.push({
-                    positionId: item.positionId,
+                    posId: item.posId,
                     name: item.name,
                     count: item.count || 0,
                     createTime: timeUtil.formatTimestamp(item.createTime),

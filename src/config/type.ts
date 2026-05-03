@@ -21,7 +21,7 @@ export interface DepartmentType {
 
 // 定义岗位数据类型
 export interface PositionType {
-    positionId: number;
+    posId: number;
     name: string;
     count: number;
     createTime: string;
