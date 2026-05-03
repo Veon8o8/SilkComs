@@ -638,55 +638,92 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         );
     };
 
-    // 渲染选项卡内容
+    // // 渲染选项卡内容
+    // renderTabContent = () => {
+    //     return (
+    //         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+    //             <Tabs
+    //                 activeKey={this.state.activeTab}
+    //                 onChange={this.onTabChange}
+    //                 style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+    //             >
+    //                 <TabPane
+    //                     tab={<span><UserOutlined />基本信息</span>}
+    //                     key="basic"
+    //                 >
+    //                     <div style={{
+    //                         height: 'calc(80vh - 300px)',
+    //                         overflowY: 'auto',
+    //                         overflowX: 'hidden',
+    //                         paddingRight: '8px'
+    //                     }}>
+    //                         {this.renderBasicInfo()}
+    //                     </div>
+    //                 </TabPane>
+    //                 <TabPane
+    //                     tab={<span><DollarOutlined />用工信息</span>}
+    //                     key="employment"
+    //                 >
+    //                     <div style={{
+    //                         height: 'calc(80vh - 300px)',
+    //                         overflowY: 'auto',
+    //                         overflowX: 'hidden',
+    //                         paddingRight: '8px'
+    //                     }}>
+    //                         {this.renderEmploymentInfo()}
+    //                     </div>
+    //                 </TabPane>
+    //                 <TabPane
+    //                     tab={<span><PhoneOutlined />通讯信息</span>}
+    //                     key="contact"
+    //                 >
+    //                     <div style={{
+    //                         height: 'calc(80vh - 300px)',
+    //                         overflowY: 'auto',
+    //                         overflowX: 'hidden',
+    //                         paddingRight: '8px'
+    //                     }}>
+    //                         {this.renderContactInfo()}
+    //                     </div>
+    //                 </TabPane>
+    //             </Tabs>
+    //         </div>
+    //     );
+    // };
+
     renderTabContent = () => {
+        const { activeTab } = this.state;
+
         return (
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 <Tabs
-                    activeKey={this.state.activeTab}
+                    activeKey={activeTab}
                     onChange={this.onTabChange}
                     style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
-                    <TabPane
-                        tab={<span><UserOutlined />基本信息</span>}
-                        key="basic"
-                    >
-                        <div style={{
-                            height: 'calc(80vh - 300px)',
-                            overflowY: 'auto',
-                            overflowX: 'hidden',
-                            paddingRight: '8px'
-                        }}>
+                    <TabPane tab={<span><UserOutlined />基本信息</span>} key="basic" />
+                    <TabPane tab={<span><DollarOutlined />用工信息</span>} key="employment" />
+                    <TabPane tab={<span><PhoneOutlined />通讯信息</span>} key="contact" />
+                </Tabs>
+
+                {/* 使用 CSS 控制显示隐藏，确保所有表单字段都被渲染 */}
+                <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
+                    <div style={{ display: activeTab === 'basic' ? 'block' : 'none', height: '100%' }}>
+                        <div style={{ height: 'calc(80vh - 300px)', overflowY: 'auto', paddingRight: '8px' }}>
                             {this.renderBasicInfo()}
                         </div>
-                    </TabPane>
-                    <TabPane
-                        tab={<span><DollarOutlined />用工信息</span>}
-                        key="employment"
-                    >
-                        <div style={{
-                            height: 'calc(80vh - 300px)',
-                            overflowY: 'auto',
-                            overflowX: 'hidden',
-                            paddingRight: '8px'
-                        }}>
+                    </div>
+                    <div style={{ display: activeTab === 'employment' ? 'block' : 'none', height: '100%' }}>
+                        <div style={{ height: 'calc(80vh - 300px)', overflowY: 'auto', paddingRight: '8px' }}>
                             {this.renderEmploymentInfo()}
                         </div>
-                    </TabPane>
-                    <TabPane
-                        tab={<span><PhoneOutlined />通讯信息</span>}
-                        key="contact"
-                    >
-                        <div style={{
-                            height: 'calc(80vh - 300px)',
-                            overflowY: 'auto',
-                            overflowX: 'hidden',
-                            paddingRight: '8px'
-                        }}>
+                    </div>
+                    <div style={{ display: activeTab === 'contact' ? 'block' : 'none', height: '100%' }}>
+                        <div style={{ height: 'calc(80vh - 300px)', overflowY: 'auto', paddingRight: '8px' }}>
                             {this.renderContactInfo()}
                         </div>
-                    </TabPane>
-                </Tabs>
+                    </div>
+                </div>
             </div>
         );
     };
