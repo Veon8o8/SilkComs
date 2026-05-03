@@ -1,8 +1,8 @@
 // src/page/ef/eg/add.modal.tsx
 
 import React from 'react';
-import { Modal, Form, Input, Select, DatePicker, Row, Col, Button, Tabs, message, Upload } from 'antd';
-import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Select, DatePicker, Row, Col, Button, Tabs, message, Upload, Space } from 'antd';
+import { UserOutlined, PhoneOutlined, DollarOutlined, UploadOutlined, ThunderboltOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { withTranslation } from 'react-i18next';
@@ -10,6 +10,13 @@ import { DepartmentType, PositionType } from '../../../config/type';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
+
+// 紧急联系人类型定义
+export interface EmergencyContactType {
+    contact_name: string;
+    contact_relationship: string;
+    contact_phone: string;
+}
 
 // 定义员工新增表单数据类型
 export interface AddEmployeeFormData {
@@ -30,9 +37,7 @@ export interface AddEmployeeFormData {
     maritalStatus: string;
     politicalStatus: string;      // 政治面貌
     employeePhoto?: string;        // 员工照片
-    emergencyContact: string;      // 紧急联系人
-    emergencyRelationship: string; // 紧急联系人关系
-    emergencyPhone: string;        // 紧急联系电话
+    emergencyContacts: EmergencyContactType[]; // 紧急联系人数组
 
     // 通讯信息
     phone: string;
@@ -105,6 +110,11 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                     workStartDate: values.workStartDate?.format('YYYY-MM-DD'),
                     entryDate: values.entryDate?.format('YYYY-MM-DD'),
                     regularDate: values.regularDate?.format('YYYY-MM-DD'),
+                    // 过滤掉空的紧急联系人
+                    emergencyContacts: (values.emergencyContacts || []).filter(
+                        (contact: EmergencyContactType) => 
+                            contact.contact_name || contact.contact_relationship || contact.contact_phone
+                    )
                 };
                 console.log('1---表单验证成功，提交数据:', formattedValues);
                 onOk(formattedValues as AddEmployeeFormData);
@@ -132,7 +142,6 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         const birthStr = dayjs(birthDate).format('YYYYMMDD');
         const sequence = Math.floor(Math.random() * 999).toString().padStart(3, '0');
         const idCard17 = areaCode + birthStr + sequence;
-        // 简单的校验码计算（实际应该用标准算法，这里简化）
         const checkCode = Math.floor(Math.random() * 10).toString();
         return idCard17 + checkCode;
     };
@@ -140,6 +149,19 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
     // 生成随机日期
     generateRandomDate = (start: Date, end: Date): Date => {
         return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    };
+
+    // 生成随机紧急联系人
+    generateRandomContact = (index: number): EmergencyContactType => {
+        const surnames = ['张', '王', '李', '刘', '陈', '杨'];
+        const givenNames = ['伟', '芳', '娜', '敏', '静'];
+        const relationships = ['父亲', '母亲', '配偶', '兄弟', '姐妹', '子女'];
+        
+        return {
+            contact_name: `${surnames[Math.floor(Math.random() * surnames.length)]}${givenNames[Math.floor(Math.random() * givenNames.length)]}`,
+            contact_relationship: relationships[Math.floor(Math.random() * relationships.length)],
+            contact_phone: `1${Math.floor(Math.random() * 7) + 3}${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`
+        };
     };
 
     // 随机填充表单
@@ -158,12 +180,10 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             givenNames[Math.floor(Math.random() * givenNames.length)];
 
         // 随机部门
-        // const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].name;
-        const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].depId; // 传出参数就是ID
+        const randomDept = departmentList[Math.floor(Math.random() * departmentList.length)].depId;
 
         // 随机岗位
-        // const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].name;
-        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].posId; // 传出参数就是ID
+        const randomPosition = positionList[Math.floor(Math.random() * positionList.length)].posId;
 
         // 随机性别
         const randomGender = Math.random() > 0.5 ? '男' : '女';
@@ -211,15 +231,16 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         const districts = ['高新区', '武侯区', '青羊区', '锦江区', '金牛区'];
         const randomAddress = `${cities[Math.floor(Math.random() * cities.length)]}/${districts[Math.floor(Math.random() * districts.length)]}`;
 
+        // 随机生成1-3个紧急联系人
+        const contactCount = Math.floor(Math.random() * 3) + 1;
+        const randomEmergencyContacts = Array.from({ length: contactCount }, (_, i) => this.generateRandomContact(i));
+
         // 设置表单值
         const formValues = {
-            // 顶部字段
             code: randomCode,
             name: randomName,
             department: randomDept,
             position: randomPosition,
-
-            // 基本信息
             idCard: this.generateIdCard(),
             gender: randomGender,
             birthDate: dayjs(randomBirthDate),
@@ -229,15 +250,9 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
             ethnicity: randomEthnicity,
             maritalStatus: randomMaritalStatus,
             politicalStatus: randomPolitical,
-            emergencyContact: `张${Math.floor(Math.random() * 100)}`,
-            emergencyRelationship: `朋友`,
-            emergencyPhone: randomPhone,
-
-            // 通讯信息
+            emergencyContacts: randomEmergencyContacts,
             phone: randomPhone,
             permanentAddress: `${randomAddress}某某街道${Math.floor(Math.random() * 200) + 1}号`,
-
-            // 用工信息
             employmentType: randomEmploymentType,
             employeeStatus: randomEmployeeStatus,
             workStartDate: dayjs(randomWorkStartDate),
@@ -249,7 +264,105 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         };
 
         form.setFieldsValue(formValues);
-        message.success('已随机填充表单数据');
+        message.success(`已随机填充表单数据，包含${contactCount}个紧急联系人`);
+    };
+
+    // 渲染紧急联系人表单列表（动态列表）
+    renderEmergencyContacts = () => {
+        return (
+            <Form.List name="emergencyContacts">
+                {(fields, { add, remove }) => (
+                    <>
+                        <div style={{ marginBottom: 16 }}>
+                            <Button
+                                type="dashed"
+                                onClick={() => add()}
+                                icon={<PlusOutlined />}
+                                style={{ width: '100%' }}
+                            >
+                                添加紧急联系人
+                            </Button>
+                        </div>
+                        {fields.map(({ key, name, ...restField }) => (
+                            <div
+                                key={key}
+                                style={{
+                                    marginBottom: 16,
+                                    padding: '12px',
+                                    border: '1px solid #d9d9d9',
+                                    borderRadius: '6px',
+                                    position: 'relative',
+                                    backgroundColor: '#fafafa'
+                                }}
+                            >
+                                <Row gutter={16} align="middle">
+                                    <Col span={7}>
+                                        <Form.Item
+                                            {...restField}
+                                            name={[name, 'contact_name']}
+                                            label="紧急联系人姓名"
+                                            style={{ marginBottom: 0 }}
+                                            rules={[{ required: true, message: '请输入联系人姓名' }]}
+                                        >
+                                            <Input placeholder="请输入姓名" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={7}>
+                                        <Form.Item
+                                            {...restField}
+                                            name={[name, 'contact_relationship']}
+                                            label="紧急联系人关系"
+                                            style={{ marginBottom: 0 }}
+                                            rules={[{ required: true, message: '请输入联系人关系' }]}
+                                        >
+                                            <Select placeholder="请选择关系" allowClear>
+                                                <Option value="父亲">父亲</Option>
+                                                <Option value="母亲">母亲</Option>
+                                                <Option value="配偶">配偶</Option>
+                                                <Option value="子女">子女</Option>
+                                                <Option value="兄弟">兄弟</Option>
+                                                <Option value="姐妹">姐妹</Option>
+                                                <Option value="朋友">朋友</Option>
+                                                <Option value="其他">其他</Option>
+                                            </Select>
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={8}>
+                                        <Form.Item
+                                            {...restField}
+                                            name={[name, 'contact_phone']}
+                                            label="紧急联系电话"
+                                            style={{ marginBottom: 0 }}
+                                            rules={[
+                                                { required: true, message: '请输入联系电话' },
+                                                { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号' }
+                                            ]}
+                                        >
+                                            <Input placeholder="请输入联系电话" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={2}>
+                                        <Button
+                                            type="text"
+                                            danger
+                                            icon={<MinusCircleOutlined />}
+                                            onClick={() => remove(name)}
+                                            style={{ marginTop: 24 }}
+                                        />
+                                    </Col>
+                                </Row>
+                            </div>
+                        ))}
+                        {fields.length === 0 && (
+                            <div style={{ textAlign: 'center', color: '#999', padding: '20px', border: '1px dashed #d9d9d9', borderRadius: '6px' }}>
+                                <PlusOutlined style={{ fontSize: 24, marginBottom: 8 }} />
+                                <div>暂无紧急联系人，点击上方按钮添加</div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </Form.List>
+        );
     };
 
     // 渲染顶部公共字段
@@ -299,7 +412,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 optionFilterProp="children"
                             >
                                 {departmentList.map(dept => (
-                                    <Option key={dept.depId} value={dept.depId}>  {/* 表单存储的是部门 ID，用户看到的是部门名 */}
+                                    <Option key={dept.depId} value={dept.depId}>
                                         {dept.name}
                                     </Option>
                                 ))}
@@ -318,7 +431,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                                 optionFilterProp="children"
                             >
                                 {positionList.map(pos => (
-                                    <Option key={pos.posId} value={pos.posId}> {/* 表单存储的是岗位 ID，用户看到的是岗位名 */}
+                                    <Option key={pos.posId} value={pos.posId}>
                                         {pos.name}
                                     </Option>
                                 ))}
@@ -432,7 +545,6 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                     </Col>
                 </Row>
 
-                {/* 政治面貌 */}
                 <Row gutter={16}>
                     <Col span={24}>
                         <Form.Item
@@ -476,36 +588,13 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                     </Col>
                 </Row>
 
-                {/* 紧急联系人 */}
-                <Row gutter={16}>
-                    <Col span={8}>
-                        <Form.Item
-                            name="emergencyContact"
-                            label="紧急联系人"
-                        >
-                            <Input placeholder="请输入紧急联系人姓名" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="emergencyRelationship"
-                            label="紧急联系人关系"
-                        >
-                            <Input placeholder="请输入紧急联系人关系" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="emergencyPhone"
-                            label="紧急联系电话"
-                            rules={[
-                                { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号' }
-                            ]}
-                        >
-                            <Input placeholder="请输入紧急联系电话" />
-                        </Form.Item>
-                    </Col>
-                </Row>
+                {/* 紧急联系人 - 动态列表 */}
+                <div style={{ marginTop: 16 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12 }}>
+                        紧急联系人
+                    </div>
+                    {this.renderEmergencyContacts()}
+                </div>
             </>
         );
     };
@@ -648,59 +737,6 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
         );
     };
 
-    // // 渲染选项卡内容
-    // renderTabContent = () => {
-    //     return (
-    //         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-    //             <Tabs
-    //                 activeKey={this.state.activeTab}
-    //                 onChange={this.onTabChange}
-    //                 style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-    //             >
-    //                 <TabPane
-    //                     tab={<span><UserOutlined />基本信息</span>}
-    //                     key="basic"
-    //                 >
-    //                     <div style={{
-    //                         height: 'calc(80vh - 300px)',
-    //                         overflowY: 'auto',
-    //                         overflowX: 'hidden',
-    //                         paddingRight: '8px'
-    //                     }}>
-    //                         {this.renderBasicInfo()}
-    //                     </div>
-    //                 </TabPane>
-    //                 <TabPane
-    //                     tab={<span><DollarOutlined />用工信息</span>}
-    //                     key="employment"
-    //                 >
-    //                     <div style={{
-    //                         height: 'calc(80vh - 300px)',
-    //                         overflowY: 'auto',
-    //                         overflowX: 'hidden',
-    //                         paddingRight: '8px'
-    //                     }}>
-    //                         {this.renderEmploymentInfo()}
-    //                     </div>
-    //                 </TabPane>
-    //                 <TabPane
-    //                     tab={<span><PhoneOutlined />通讯信息</span>}
-    //                     key="contact"
-    //                 >
-    //                     <div style={{
-    //                         height: 'calc(80vh - 300px)',
-    //                         overflowY: 'auto',
-    //                         overflowX: 'hidden',
-    //                         paddingRight: '8px'
-    //                     }}>
-    //                         {this.renderContactInfo()}
-    //                     </div>
-    //                 </TabPane>
-    //             </Tabs>
-    //         </div>
-    //     );
-    // };
-
     renderTabContent = () => {
         const { activeTab } = this.state;
 
@@ -716,7 +752,6 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                     <TabPane tab={<span><PhoneOutlined />通讯信息</span>} key="contact" />
                 </Tabs>
 
-                {/* 使用 CSS 控制显示隐藏，确保所有表单字段都被渲染 */}
                 <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
                     <div style={{ display: activeTab === 'basic' ? 'block' : 'none', height: '100%' }}>
                         <div style={{ height: 'calc(80vh - 300px)', overflowY: 'auto', paddingRight: '8px' }}>
@@ -773,7 +808,7 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                 open={visible}
                 onCancel={this.handleCancel}
                 footer={this.renderFooter()}
-                width={700}
+                width={800}
                 destroyOnClose
                 confirmLoading={loading}
                 style={{ top: '40px' }}
@@ -790,10 +825,10 @@ class _AddEmployeeModal extends React.Component<AddEmployeeModalProps, AddEmploy
                         householdRegister: '四川省/宜宾市',
                         permanentAddress: '四川省/宜宾市',
                         probationDays: 0,
+                        emergencyContacts: []
                     }}
                     style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
-                    {/* 禁止该 flex 项目在容器空间不足时被压缩。 */}
                     <div style={{ flexShrink: 0 }}>
                         {this.renderTopFields()}
                     </div>
