@@ -37,17 +37,7 @@ interface EmployeeType {
 }
 
 // 模拟初始数据
-const initData: EmployeeType[] = [
-    // { id: '1', code: 'FR00002', name: '游显和', gender:'男', department: '总经办', status: '在职', position: '总经理、数字化总监', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '2', code: 'FR00008', name: '胡国蓉', department: '销售部', status: '在职', position: '销售组负责人', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '3', code: 'FR00010', name: '罗明连', department: '仓储部', status: '在职', position: '仓储组负责人', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '4', code: 'FR00012', name: '余少兵', department: '采购部', status: '在职', position: '采购部负责人', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '5', code: 'FR00016', name: '马德兵', department: '生产部', status: '在职', position: '设备组工作人员', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '6', code: 'FR00007', name: '古相连', department: '销售部', status: '在职', position: '销售组工作人员', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '7', code: 'FR00009', name: '李光容', department: '仓储部', status: '在职', position: '仓储组工作人员', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '8', code: 'FR00011', name: '段敏', department: '采购部', status: '在职', position: '采购部工作人员', createTime: timeUtil.formatDate(new Date()) },
-    // { id: '9', code: 'FR00015', name: '何成斌', department: '生产部', status: '在职', position: '生产组工作人员', createTime: timeUtil.formatDate(new Date()) },
-];
+const initData: EmployeeType[] = [];
 
 interface _FrameEmployeeGalleryState {
     dataSource: EmployeeType[];
@@ -547,11 +537,11 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                                         bodyStyle={{ padding: '20px 16px' }}
                                     >
                                         {/* 头像区域 - 保留 */}
-                                        <Avatar
+                                        {/* <Avatar
                                             size={64}
                                             icon={<UserOutlined />}
                                             style={{ backgroundColor: '#1890ff', marginBottom: '12px' }}
-                                        />
+                                        /> */}
 
                                         {/* 员工姓名 - 加粗大字号 */}
                                         <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
