@@ -1,7 +1,11 @@
 // src/page/wb/frame.tsx
 import React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
-import { DepartmentType, PositionType } from '../../config/type';
+import { DepartmentType, PositionType, SucResponse, ErrResponse } from '../../config/type';
+import { LOCAL_STORAGE } from '../../config/keys';
+import { httpUtil } from '../../utils/HttpUtil';
+import { timeUtil } from '../../utils/TimeUtil';
+import { EmployeeApi } from '../../config/api';
 
 // 员工数据类型
 interface EmployeeType {
@@ -32,32 +36,13 @@ interface FrameEmployeeWorkbenchState {
     };
     currentPage: number;
     pageSize: number;
+    dataSource: EmployeeType[]; // 添加 dataSource 到 state
 }
 
 class _FrameEmployeeWorkbench extends React.Component<
     WithTranslation & FrameEmployeeWorkbenchProps,
     FrameEmployeeWorkbenchState
 > {
-    // 模拟员工数据，实际使用时可由 props 传入
-    static defaultProps = {
-        employeeList: [
-            { id: 19, code: 'FR00019', name: '陈秀英', gender: '女', department: '综合办', depId: 1, position: '综合部工作人员', posId: 2, mobile: '138****0019' },
-            { id: 17, code: 'FR00017', name: '陈小钢', gender: '男', department: '设备检修部', depId: 2, position: '设备组工作人员', posId: 2, mobile: '138****0017' },
-            { id: 16, code: 'FR00016', name: '马德兵', gender: '男', department: '生产部', depId: 3, position: '设备组工作人员', posId: 2, mobile: '138****0016' },
-            { id: 15, code: 'FR00015', name: '何成斌', gender: '男', department: '生产部', depId: 3, position: '生产组工作人员', posId: 3, mobile: '138****0015' },
-            { id: 14, code: 'FR00014', name: '段敏', gender: '女', department: '生产部', depId: 3, position: '生产组工作人员', posId: 3, mobile: '138****0014' },
-            { id: 12, code: 'FR00012', name: '余少兵', gender: '男', department: '采购部', depId: 4, position: '采购部负责人', posId: 1, mobile: '138****0012' },
-            { id: 11, code: 'FR00011', name: '段敏', gender: '女', department: '采购部', depId: 4, position: '采购部工作人员', posId: 2, mobile: '138****0011' },
-            { id: 10, code: 'FR00010', name: '罗明连', gender: '女', department: '仓储部', depId: 5, position: '仓储组负责人', posId: 1, mobile: '138****0010' },
-            { id: 9, code: 'FR00009', name: '李光容', gender: '女', department: '仓储部', depId: 5, position: '仓储组工作人员', posId: 2, mobile: '138****0009' },
-            { id: 8, code: 'FR00008', name: '胡国蓉', gender: '女', department: '销售部', depId: 6, position: '销售组负责人', posId: 1, mobile: '138****0008' },
-            { id: 7, code: 'FR00007', name: '古相连', gender: '女', department: '销售部', depId: 6, position: '销售组工作人员', posId: 2, mobile: '138****0007' },
-            { id: 6, code: 'FR00006', name: '刘家文', gender: '男', department: '生产部', depId: 3, position: '生产组工作人员', posId: 3, mobile: '138****0006' },
-            { id: 5, code: 'FR00005', name: '郑顺友', gender: '男', department: '生产部', depId: 3, position: '生产组工作人员', posId: 3, mobile: '138****0005' },
-            { id: 4, code: 'FR00004', name: '董志荣', gender: '男', department: '安全巡查部', depId: 7, position: '设备组负责人', posId: 1, mobile: '138****0004' },
-        ]
-    };
-
     constructor(props: WithTranslation & FrameEmployeeWorkbenchProps) {
         super(props);
         this.state = {
@@ -69,7 +54,46 @@ class _FrameEmployeeWorkbench extends React.Component<
             },
             currentPage: 1,
             pageSize: 20,
+            dataSource: [], // 初始化 dataSource
         };
+    }
+
+    componentDidMount(): void {
+        this.getEmployeeContactList();
+    }
+
+    getEmployeeContactList = async () => {
+        // 这里去请求服务器
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+        }
+        let response = await httpUtil.post(EmployeeApi.LIST, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            console.log(`获取员工列表成功:\n`, r.data.list);
+            const list = r.data.list
+            const dataSource: EmployeeType[] = []
+            for (let i = 0; i < list.length; i++) {
+                const item = list[i]
+                dataSource.push({
+                    id: item.id,
+                    code: item.code,
+                    name: item.name,
+                    gender: item.gender,
+                    department: item.departmentName,
+                    depId: item.departmentId,
+                    position: item.departmentName + item.positionName,
+                    posId: item.positionId,
+                    mobile: item.phone,
+                })
+            }
+            this.setState({ dataSource: dataSource });
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`获取员工列表失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+        }
     }
 
     // 筛选条件变更处理
@@ -97,12 +121,12 @@ class _FrameEmployeeWorkbench extends React.Component<
 
     // 获取筛选后的员工列表
     getFilteredEmployees = (): EmployeeType[] => {
-        const { employeeList } = this.props;
+        const { dataSource } = this.state;
         const { filters } = this.state;
 
-        if (!employeeList) return [];
+        if (!dataSource) return [];
 
-        return employeeList.filter((employee) => {
+        return dataSource.filter((employee) => {
             // 部门筛选（使用 depId 精确匹配）
             if (filters.depId && employee.depId !== Number(filters.depId)) {
                 return false;
@@ -111,14 +135,14 @@ class _FrameEmployeeWorkbench extends React.Component<
             if (filters.posId && employee.posId !== Number(filters.posId)) {
                 return false;
             }
-            // // 姓名筛选（模糊匹配）
-            // if (filters.name && !employee.name.includes(filters.name)) {
-            //   return false;
-            // }
-            // // 工号筛选（模糊匹配）
-            // if (filters.employeeId && !employee.code.includes(filters.employeeId)) {
-            //   return false;
-            // }
+            // 姓名筛选（模糊匹配）
+            if (filters.name && !employee.name.includes(filters.name)) {
+                return false;
+            }
+            // 工号筛选（模糊匹配）
+            if (filters.employeeId && !employee.code.includes(filters.employeeId)) {
+                return false;
+            }
             return true;
         });
     };
@@ -177,30 +201,14 @@ class _FrameEmployeeWorkbench extends React.Component<
         const currentPageData = this.getCurrentPageData(filteredEmployees);
         const totalCount = filteredEmployees.length;
 
-        // 处理部门选项（用于下拉框）- 包含 id 和 name
         // 处理部门选项（用于下拉框）- 包含 depId 和 name
         const departmentOptions = departmentList || [
             { depId: 1, name: '综合办' },
-            { depId: 2, name: '设备检修部' },
-            { depId: 3, name: '生产部' },
-            { depId: 4, name: '采购部' },
-            { depId: 5, name: '仓储部' },
-            { depId: 6, name: '销售部' },
-            { depId: 7, name: '安全巡查部' },
         ];
 
-        // 处理岗位选项（用于下拉框）- 包含 id 和 name
+        // 处理岗位选项（用于下拉框）- 包含 posId 和 name
         const positionOptions = positionList || [
             { posId: 1, name: '综合部工作人员' },
-            { posId: 2, name: '设备组工作人员' },
-            { posId: 3, name: '生产组工作人员' },
-            { posId: 1, name: '采购部负责人' },
-            { posId: 2, name: '采购部工作人员' },
-            { posId: 1, name: '仓储组负责人' },
-            { posId: 2, name: '仓储组工作人员' },
-            { posId: 1, name: '销售组负责人' },
-            { posId: 2, name: '销售组工作人员' },
-            { posId: 1, name: '设备组负责人' },
         ].filter((item, index, self) =>
             // 去重：同一个 posId 只保留第一个
             index === self.findIndex((t) => t.posId === item.posId)

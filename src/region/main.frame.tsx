@@ -51,6 +51,16 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         let page = searchParams.get('page') || MENU_KEY.Home;
         page = strUtil.capitalizeFirstLetter(page)
         console.log(`page:`, page)
+        
+        const token: string = searchParams.get('token') || '';
+        localStorage.setItem('token', token);
+        // const token = localStorage.getItem(LOCAL_STORAGE.TOKEN)
+        console.log('用户Token:', token);
+        if (!token) {
+            // 如果没有Token，说明用户未登录，重定向到登录页
+            httpUtil.gotoLogin();
+        }
+        // TODO: 校验 token 是否过期
 
         // 获取 URL 参数
         this.state = {
@@ -63,19 +73,9 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
         };
     }
 
-    componentDidMount() {
-        // 这里可以添加一些初始化逻辑，比如获取用户信息、加载系统模块数据等
-        const params = new URLSearchParams(window.location.search);
-        const token: string = params.get('token') || '';
-        localStorage.setItem('token', token);
-        // const token = localStorage.getItem(LOCAL_STORAGE.TOKEN)
-        console.log('用户Token:', token);
-        if (!token) {
-            // 如果没有Token，说明用户未登录，重定向到登录页
-            httpUtil.gotoLogin();
-        }
-        // TODO: 校验 token 是否过期
+    
 
+    componentDidMount() {
         // 请求服务器，获取部门和岗位数据，供员工档案页面使用
         this.fetchDepartment();
         this.fetchPosition();

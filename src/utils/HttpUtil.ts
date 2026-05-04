@@ -36,6 +36,7 @@ class HttpUtil {
     }
 
     gotoLogin() {
+        // console.log(`本来该跳转到登录界面`)
         window.location.href = 'http://localhost:5173/mgmt/login';
     }
 
