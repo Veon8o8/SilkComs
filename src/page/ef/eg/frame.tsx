@@ -27,23 +27,26 @@ interface EmployeeType {
     id: string;
     code: string;        // 工号
     name: string;        // 姓名
+    gender: string;      // 性别
     department: string;  // 部门
     status: string;      // 员工状态
     position: string;    // 岗位
     createTime: string;
+    depId: number;
+    posId: number;
 }
 
 // 模拟初始数据
 const initData: EmployeeType[] = [
-    { id: '1', code: 'FR00002', name: '游显和', department: '总经办', status: '在职', position: '总经理、数字化总监', createTime: timeUtil.formatDate(new Date()) },
-    { id: '2', code: 'FR00008', name: '胡国蓉', department: '销售部', status: '在职', position: '销售组负责人', createTime: timeUtil.formatDate(new Date()) },
-    { id: '3', code: 'FR00010', name: '罗明连', department: '仓储部', status: '在职', position: '仓储组负责人', createTime: timeUtil.formatDate(new Date()) },
-    { id: '4', code: 'FR00012', name: '余少兵', department: '采购部', status: '在职', position: '采购部负责人', createTime: timeUtil.formatDate(new Date()) },
-    { id: '5', code: 'FR00016', name: '马德兵', department: '生产部', status: '在职', position: '设备组工作人员', createTime: timeUtil.formatDate(new Date()) },
-    { id: '6', code: 'FR00007', name: '古相连', department: '销售部', status: '在职', position: '销售组工作人员', createTime: timeUtil.formatDate(new Date()) },
-    { id: '7', code: 'FR00009', name: '李光容', department: '仓储部', status: '在职', position: '仓储组工作人员', createTime: timeUtil.formatDate(new Date()) },
-    { id: '8', code: 'FR00011', name: '段敏', department: '采购部', status: '在职', position: '采购部工作人员', createTime: timeUtil.formatDate(new Date()) },
-    { id: '9', code: 'FR00015', name: '何成斌', department: '生产部', status: '在职', position: '生产组工作人员', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '1', code: 'FR00002', name: '游显和', gender:'男', department: '总经办', status: '在职', position: '总经理、数字化总监', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '2', code: 'FR00008', name: '胡国蓉', department: '销售部', status: '在职', position: '销售组负责人', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '3', code: 'FR00010', name: '罗明连', department: '仓储部', status: '在职', position: '仓储组负责人', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '4', code: 'FR00012', name: '余少兵', department: '采购部', status: '在职', position: '采购部负责人', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '5', code: 'FR00016', name: '马德兵', department: '生产部', status: '在职', position: '设备组工作人员', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '6', code: 'FR00007', name: '古相连', department: '销售部', status: '在职', position: '销售组工作人员', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '7', code: 'FR00009', name: '李光容', department: '仓储部', status: '在职', position: '仓储组工作人员', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '8', code: 'FR00011', name: '段敏', department: '采购部', status: '在职', position: '采购部工作人员', createTime: timeUtil.formatDate(new Date()) },
+    // { id: '9', code: 'FR00015', name: '何成斌', department: '生产部', status: '在职', position: '生产组工作人员', createTime: timeUtil.formatDate(new Date()) },
 ];
 
 interface _FrameEmployeeGalleryState {
@@ -96,9 +99,12 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                     id: item.id,
                     code: item.code,
                     name: item.name,
-                    department: item.department,
+                    gender: item.gender,
+                    department: item.departmentName,
+                    depId: item.departmentId,
+                    position: item.departmentName + item.positionName,
+                    posId: item.positionId,
                     status: item.status,
-                    position: item.position,
                     createTime: timeUtil.formatTimestamp(item.createTime),
                 })
             }
@@ -538,6 +544,60 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                                         hoverable
                                         size="small"
                                         style={{ textAlign: 'center' }}
+                                        bodyStyle={{ padding: '20px 16px' }}
+                                    >
+                                        {/* 头像区域 - 保留 */}
+                                        <Avatar
+                                            size={64}
+                                            icon={<UserOutlined />}
+                                            style={{ backgroundColor: '#1890ff', marginBottom: '12px' }}
+                                        />
+
+                                        {/* 员工姓名 - 加粗大字号 */}
+                                        <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
+                                            {employee.name}
+                                        </div>
+
+                                        {/* 岗位 - 放在姓名下方，参考图的总经办/总经理 */}
+                                        <div style={{ fontSize: '13px', color: '#1890ff', marginBottom: '12px' }}>
+                                            {employee.position}
+                                        </div>
+
+                                        {/* 分割线 - 增加信息层次 */}
+                                        <div style={{ height: '1px', background: '#f0f0f0', margin: '12px 0' }} />
+
+                                        {/* 详细信息区域 - 采用左右两列布局，更紧凑 */}
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '1fr 1fr',
+                                            gap: '8px 12px',
+                                            textAlign: 'left',
+                                            marginTop: '4px'
+                                        }}>
+                                            <div>
+                                                <div style={{ fontSize: '11px', color: '#bbb' }}>工号</div>
+                                                <div style={{ fontSize: '13px', fontWeight: 500 }}>{employee.code}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '11px', color: '#bbb' }}>部门</div>
+                                                <div style={{ fontSize: '13px', fontWeight: 500 }}>{employee.department}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '11px', color: '#bbb' }}>员工状态</div>
+                                                <div style={{ fontSize: '13px', fontWeight: 500 }}>
+                                                    {this.renderStatus(employee.status)}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '11px', color: '#bbb' }}>性别</div>
+                                                <div style={{ fontSize: '13px', fontWeight: 500 }}>{employee.gender}</div>
+                                            </div>
+                                        </div>
+                                    </AntCard>
+                                    {/* <AntCard
+                                        hoverable
+                                        size="small"
+                                        style={{ textAlign: 'center' }}
                                         bodyStyle={{ padding: '16px' }}
                                     >
                                         <Avatar
@@ -553,14 +613,14 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                                                 {employee.name}
                                             </div>
                                             <div style={{ fontSize: '12px', color: '#666' }}>
-                                                内部成员 · {employee.department}
+                                                部门 {employee.department}
                                             </div>
                                             {this.renderStatus(employee.status)}
                                             <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
                                                 岗位 {employee.position}
                                             </div>
                                         </div>
-                                    </AntCard>
+                                    </AntCard> */}
                                 </Col>
                             ))}
                         </Row>
