@@ -165,7 +165,11 @@ class _MainFrame extends React.Component<WithTranslation & MainFrameProps, MainF
             switch (this.state.itemKey) {
                 case MENU_KEY.Home:
                     return (
-                        <FrameHome />
+                        <FrameHome
+                            headerHeight={headerHeight}
+                            departmentList={this.state.departmentList}
+                            positionList={this.state.positionList}
+                        />
                     )
                 case MENU_KEY.DepartmentPosition:
                     return (
