@@ -259,12 +259,9 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
             const data = r.data.employee;
             DEBUG && console.log(TAG, `获取员工详情成功:\n`, data);
             let detail = {
+                ...data,
                 id: data.employeeId,
-                code: data.code,                    // 工号
-                name: data.name,                    // 姓名
-                gender: data.gender,                // 性别
                 department: data.departmentName,    // 部门
-                status: data.status,                // 员工状态
                 position: data.positionName,        // 岗位
                 createTime: timeUtil.formatTimestamp(data.createTime),
                 depId: data.departmentId,
