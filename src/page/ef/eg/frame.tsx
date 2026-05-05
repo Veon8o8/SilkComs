@@ -584,33 +584,6 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                                             </div>
                                         </div>
                                     </AntCard>
-                                    {/* <AntCard
-                                        hoverable
-                                        size="small"
-                                        style={{ textAlign: 'center' }}
-                                        bodyStyle={{ padding: '16px' }}
-                                    >
-                                        <Avatar
-                                            size={64}
-                                            icon={<UserOutlined />}
-                                            style={{ backgroundColor: '#1890ff', marginBottom: '12px' }}
-                                        />
-                                        <div>
-                                            <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>
-                                                工号 {employee.code}
-                                            </div>
-                                            <div style={{ fontSize: '16px', fontWeight: 500, marginBottom: '8px' }}>
-                                                {employee.name}
-                                            </div>
-                                            <div style={{ fontSize: '12px', color: '#666' }}>
-                                                部门 {employee.department}
-                                            </div>
-                                            {this.renderStatus(employee.status)}
-                                            <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-                                                岗位 {employee.position}
-                                            </div>
-                                        </div>
-                                    </AntCard> */}
                                 </Col>
                             ))}
                         </Row>
