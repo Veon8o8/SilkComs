@@ -15,6 +15,7 @@ import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../../..
 import { timeUtil } from '../../../utils/TimeUtil';
 import { CONTENT } from '../../../config/layout';
 import { AddEmployeeModal } from './add.modal';
+import { EmployeeDetailModal } from './detail.modal'; // 新增：导入员工详情弹框
 
 interface FrameEmployeeGalleryProps {
     headerHeight: number;
@@ -23,7 +24,7 @@ interface FrameEmployeeGalleryProps {
 }
 
 // 定义员工数据类型
-interface EmployeeType {
+export interface EmployeeType {  // 导出供其他组件使用
     id: string;
     code: string;        // 工号
     name: string;        // 姓名
@@ -43,6 +44,8 @@ interface _FrameEmployeeGalleryState {
     dataSource: EmployeeType[];
     departments: DepartmentType[];
     modalVisible: boolean;
+    detailModalVisible: boolean;  // 新增：详情弹框可见性
+    selectedEmployee: EmployeeType | null;  // 新增：选中的员工
     editingEmployee: EmployeeType | null;
     searchName: string;
     activeDepartment: string;
@@ -60,8 +63,9 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         this.state = {
             dataSource: initData,
             departments: departmentList,
-            // departments: initDepartments,
             modalVisible: false,
+            detailModalVisible: false,  // 新增
+            selectedEmployee: null,      // 新增
             editingEmployee: null,
             searchName: '',
             activeDepartment: '',
@@ -131,70 +135,10 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 message.error('添加失败');
                 return;
             }
-            // const newEmployee: EmployeeType = {
-            //     id: result.id,
-            //     code: values.code,
-            //     name: values.name,
-            //     department: values.department,
-            //     status: values.status,
-            //     position: values.position,
-            //     createTime: timeUtil.formatDate(new Date()),
-            // };
-            // this.setState({ dataSource: [...dataSource, newEmployee] }, () => {
-            //     message.success('添加成功');
-            //     this.actionRef.current?.reload();
-            // });
         }
         this.setState({ modalVisible: false, editingEmployee: null });
         form.resetFields();
     };
-
-    // // 保存员工（新增或编辑）- 本地版本
-    // handleSave = (values: any) => {
-
-    //     const { editingEmployee, dataSource } = this.state;
-    //     const form = this.formRef.current;
-
-    //     // form.validateFields().then((values: any) => {
-    //     console.log('=============表单验证成功，提交数据:', values);
-    //     if (editingEmployee) {
-    //         // 编辑员工 - 本地编辑
-    //         const updatedData = dataSource.map(item =>
-    //             item.id === editingEmployee.id
-    //                 ? { ...item, ...values }
-    //                 : item
-    //         );
-    //         this.setState({ dataSource: updatedData }, () => {
-    //             message.success('编辑成功');
-    //             this.actionRef.current?.reload();
-    //         });
-    //     } else {
-    //         // 新增员工 - 本地新增
-    //         // 生成模拟 ID（使用时间戳 + 随机数）
-    //         const newId = Date.now().toString() + Math.random().toString(36).substr(2, 6);
-
-    //         const newEmployee: EmployeeType = {
-    //             id: newId,
-    //             code: values.code || `FR${String(dataSource.length + 1).padStart(5, '0')}`, // 自动生成工号
-    //             name: values.name,
-    //             department: values.department,
-    //             status: values.status,
-    //             position: values.position,
-    //             createTime: timeUtil.formatDate(new Date()),
-    //         };
-
-    //         this.setState({
-    //             dataSource: [...dataSource, newEmployee]
-    //         }, () => {
-    //             message.success('添加成功');
-    //             this.actionRef.current?.reload();
-    //         });
-    //     }
-
-    //     // 关闭弹框并重置表单
-    //     this.setState({ modalVisible: false, editingEmployee: null });
-    //     form.resetFields();
-    // };
 
     editEmployee = async (id: string, values: any) => {
         const params = {
@@ -306,6 +250,22 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
             } else {
                 console.warn(TAG, '表单实例未找到，无法设置初始值');
             }
+        });
+    };
+
+    // 新增：打开详情模态框
+    showDetailModal = (employee: EmployeeType) => {
+        this.setState({
+            selectedEmployee: employee,
+            detailModalVisible: true,
+        });
+    };
+
+    // 新增：关闭详情模态框
+    handleDetailModalCancel = () => {
+        this.setState({
+            detailModalVisible: false,
+            selectedEmployee: null,
         });
     };
 
@@ -483,7 +443,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
         );
     };
 
-    // 渲染员工卡片视图（画廊模式）
+    // 修改：渲染员工卡片视图（画廊模式），添加点击事件
     renderGalleryView = () => {
         const { searchName, activeDepartment, dataSource } = this.state;
         let filteredData = [...dataSource];
@@ -533,10 +493,11 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                                     <AntCard
                                         hoverable
                                         size="small"
-                                        style={{ textAlign: 'center' }}
+                                        style={{ textAlign: 'center', cursor: 'pointer' }}
                                         bodyStyle={{ padding: '20px 16px' }}
+                                        onClick={() => this.showDetailModal(employee)}  // 新增：点击卡片打开详情
                                     >
-                                        {/* 头像区域 - 保留 */}
+                                        {/* 头像区域 */}
                                         {/* <Avatar
                                             size={64}
                                             icon={<UserOutlined />}
@@ -548,15 +509,15 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                                             {employee.name}
                                         </div>
 
-                                        {/* 岗位 - 放在姓名下方，参考图的总经办/总经理 */}
+                                        {/* 岗位 - 放在姓名下方 */}
                                         <div style={{ fontSize: '13px', color: '#1890ff', marginBottom: '12px' }}>
                                             {employee.position}
                                         </div>
 
-                                        {/* 分割线 - 增加信息层次 */}
+                                        {/* 分割线 */}
                                         <div style={{ height: '1px', background: '#f0f0f0', margin: '12px 0' }} />
 
-                                        {/* 详细信息区域 - 采用左右两列布局，更紧凑 */}
+                                        {/* 详细信息区域 */}
                                         <div style={{
                                             display: 'grid',
                                             gridTemplateColumns: '1fr 1fr',
@@ -608,24 +569,6 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                         >
                             添加
                         </Button>
-                        {/* <Button
-                            icon={<ExportOutlined />}
-                            onClick={this.handleExport}
-                        >
-                            导出
-                        </Button>
-                        <Button
-                            icon={<DeleteOutlined />}
-                            onClick={() => message.info('删除')}
-                        >
-                            删除
-                        </Button>
-                        <Button
-                            icon={<HistoryOutlined />}
-                            onClick={this.handleHistory}
-                        >
-                            操作记录
-                        </Button> */}
                     </Space>
                 </Col>
                 <Col>
@@ -641,7 +584,6 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                             }}
                             style={{ width: 200 }}
                         />
-                        {/* <Button icon={<SearchOutlined />}>筛选</Button> */}
                     </Space>
                 </Col>
             </Row>
@@ -661,6 +603,18 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 constentHeiht={this.contentHeight}
                 departmentList={departmentList}
                 positionList={positionList}
+            />
+        );
+    };
+
+    // 新增：渲染详情模态框
+    renderDetailModal = () => {
+        const { detailModalVisible, selectedEmployee } = this.state;
+        return (
+            <EmployeeDetailModal
+                visible={detailModalVisible}
+                employee={selectedEmployee}
+                onCancel={this.handleDetailModalCancel}
             />
         );
     };
@@ -689,6 +643,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
                 {this.renderDepartmentBar()}
                 {this.renderGalleryView()}
                 {this.renderModal()}
+                {this.renderDetailModal()}  {/* 新增 */}
             </Card>
         );
     }
