@@ -2,9 +2,9 @@
 
 import React, { JSX } from 'react';
 import { Modal, Tag, Avatar, Space, Button, Divider, Row, Col, Card, Table, Badge, Tabs, Descriptions, Typography } from 'antd';
-import { 
-    UserOutlined, 
-    PhoneOutlined, 
+import {
+    UserOutlined,
+    PhoneOutlined,
     CalendarOutlined,
     TeamOutlined,
     IdcardOutlined,
@@ -22,8 +22,9 @@ import {
     HistoryOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { EmployeeType } from './frame';
 import { withTranslation } from 'react-i18next';
+import { EmployeeDetailType, EmployeeType, ErrResponse, SucResponse } from '../../../config/type';
+import { EmergencyContactType } from './add.modal';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -31,67 +32,16 @@ const { TabPane } = Tabs;
 interface EmployeeDetailModalProps {
     visible: boolean;
     employee: EmployeeType | null;
+    detail: EmployeeDetailType | null;
     onCancel: () => void;
-}
-
-// 紧急联系人类型（与添加面板一致）
-interface EmergencyContactType {
-    contact_name: string;
-    contact_relationship: string;
-    contact_phone: string;
-}
-
-// 扩展员工详情类型，包含添加面板的所有字段
-interface EmployeeDetailType extends EmployeeType {
-    // 基本信息
-    idCard?: string;
-    birthDate?: string;
-    birthplace?: string;
-    householdRegister?: string;
-    householdType?: string;
-    ethnicity?: string;
-    maritalStatus?: string;
-    politicalStatus?: string;
-    employeePhoto?: string;
-    emergencyContacts?: EmergencyContactType[];
-    
-    // 通讯信息
-    phone?: string;
-    email?: string;
-    permanentAddress?: string;
-    
-    // 用工信息
-    employmentType?: string;
-    workStartDate?: string;
-    entryDate?: string;
-    probationDays?: number;
-    regularDate?: string;
-    probationSalary?: number;
-    formalSalary?: number;
-    
-    // 汇报关系
-    reportTo?: string;
-    reportToName?: string;
-    
-    // 账户信息
-    bankCard?: string;
-    bankName?: string;
-    
-    // 教育信息
-    education?: string;
-    school?: string;
-    major?: string;
-    graduationDate?: string;
-    
-    // 提交信息
-    submitter?: string;
-    submitTime?: string;
 }
 
 interface EmployeeDetailModalState {
     loading: boolean;
     activeTab: string;
 }
+
+const CLS_NAME = `EmployeeDetailModal`;
 
 class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, EmployeeDetailModalState> {
     constructor(props: EmployeeDetailModalProps) {
@@ -117,8 +67,8 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
 
     // 渲染性别
     renderGender = (gender: string) => {
-        return gender === '男' ? 
-            <Tag color="blue">男</Tag> : 
+        return gender === '男' ?
+            <Tag color="blue">男</Tag> :
             <Tag color="pink">女</Tag>;
     };
 
@@ -143,8 +93,8 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
     // 渲染顶部标题区域
     renderHeader = (employee: EmployeeDetailType) => {
         return (
-            <div style={{ 
-                padding: '20px 24px', 
+            <div style={{
+                padding: '20px 24px',
                 borderBottom: '1px solid #f0f0f0',
                 backgroundColor: '#fafafa'
             }}>
@@ -152,7 +102,7 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
                     <Avatar
                         size={64}
                         icon={!employee.name && <UserOutlined />}
-                        style={{ 
+                        style={{
                             backgroundColor: this.getAvatarColor(),
                             fontSize: '28px',
                         }}
@@ -384,8 +334,8 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
     // 渲染底部提交信息
     renderFooterInfo = (employee: EmployeeDetailType) => {
         return (
-            <div style={{ 
-                padding: '12px 24px', 
+            <div style={{
+                padding: '12px 24px',
                 borderTop: '1px solid #f0f0f0',
                 backgroundColor: '#fafafa',
                 display: 'flex',
@@ -409,7 +359,7 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
     // 渲染左侧菜单
     renderSideMenu = () => {
         const { activeTab } = this.state;
-        
+
         const menuItems = [
             { key: 'basic', icon: <UserOutlined />, label: '基本信息' },
             { key: 'employment', icon: <DollarOutlined />, label: '用工信息' },
@@ -421,8 +371,8 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
         ];
 
         return (
-            <div style={{ 
-                width: 160, 
+            <div style={{
+                width: 160,
                 borderRight: '1px solid #f0f0f0',
                 backgroundColor: '#fafafa',
                 padding: '16px 0'
@@ -456,7 +406,7 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
     // 渲染右侧内容
     renderContent = (employee: EmployeeDetailType) => {
         const { activeTab } = this.state;
-        
+
         const tabContent: { [key: string]: JSX.Element } = {
             basic: this.renderBasicInfo(employee),
             employment: this.renderEmploymentInfo(employee),
@@ -485,12 +435,18 @@ class _EmployeeDetailModal extends React.Component<EmployeeDetailModalProps, Emp
     };
 
     render() {
-        const { visible, employee, onCancel } = this.props;
+        const DEBUG = true;
+        const TAG = `${CLS_NAME}.render() - `;
+        const { visible, employee, detail, onCancel } = this.props;
         const { loading } = this.state;
 
         if (!employee) return null;
 
-        const detailEmployee = employee as EmployeeDetailType;
+        let detailEmployee = employee as EmployeeDetailType;
+        DEBUG && console.log(TAG, `1. detailEmployee:\n`, detailEmployee);
+        DEBUG && console.log(TAG, `---detail:\n`, detail);
+        if (detail) detailEmployee = detail as EmployeeDetailType;
+        DEBUG && console.log(TAG, `2. detailEmployee:\n`, detailEmployee);
 
         return (
             <Modal

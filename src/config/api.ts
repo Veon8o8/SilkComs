@@ -99,4 +99,5 @@ export const EmployeeApi = {
     ADD: `${URL}/coms/employee/add`,
     EDIT: `${URL}/coms/employee/edit`,
     DEL: `${URL}/coms/employee/del`,
+    DETAIL: `${URL}/coms/employee/detail`,
 }

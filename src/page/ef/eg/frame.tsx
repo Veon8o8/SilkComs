@@ -11,7 +11,7 @@ import { PlusOutlined, ExportOutlined, DeleteOutlined, HistoryOutlined, SearchOu
 import { LOCAL_STORAGE } from '../../../config/keys';
 import { EmployeeApi } from '../../../config/api';
 import { httpUtil } from '../../../utils/HttpUtil';
-import { DepartmentType, ErrResponse, PositionType, SucResponse } from '../../../config/type';
+import { DepartmentType, EmployeeDetailType, EmployeeType, ErrResponse, PositionType, SucResponse } from '../../../config/type';
 import { timeUtil } from '../../../utils/TimeUtil';
 import { CONTENT } from '../../../config/layout';
 import { AddEmployeeModal } from './add.modal';
@@ -21,20 +21,6 @@ interface FrameEmployeeGalleryProps {
     headerHeight: number;
     departmentList: DepartmentType[],
     positionList: PositionType[],
-}
-
-// 定义员工数据类型
-export interface EmployeeType {  // 导出供其他组件使用
-    id: string;
-    code: string;        // 工号
-    name: string;        // 姓名
-    gender: string;      // 性别
-    department: string;  // 部门
-    status: string;      // 员工状态
-    position: string;    // 岗位
-    createTime: string;
-    depId: number;
-    posId: number;
 }
 
 // 模拟初始数据
@@ -47,6 +33,7 @@ interface _FrameEmployeeGalleryState {
     detailModalVisible: boolean;  // 新增：详情弹框可见性
     selectedEmployee: EmployeeType | null;  // 新增：选中的员工
     editingEmployee: EmployeeType | null;
+    employeeDetail: EmployeeDetailType | null;
     searchName: string;
     activeDepartment: string;
 }
@@ -67,6 +54,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
             detailModalVisible: false,  // 新增
             selectedEmployee: null,      // 新增
             editingEmployee: null,
+            employeeDetail: null,
             searchName: '',
             activeDepartment: '',
         };
@@ -90,7 +78,7 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
             for (let i = 0; i < list.length; i++) {
                 const item = list[i]
                 dataSource.push({
-                    id: item.id,
+                    id: item.employeeId,
                     code: item.code,
                     name: item.name,
                     gender: item.gender,
@@ -254,11 +242,47 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
     };
 
     // 新增：打开详情模态框
-    showDetailModal = (employee: EmployeeType) => {
-        this.setState({
-            selectedEmployee: employee,
-            detailModalVisible: true,
-        });
+    showDetailModal = async (employee: EmployeeType) => {
+        const DEBUG = true;
+        const TAG = `${CLS_NAME}.showDetailModal() - `;
+
+        DEBUG && console.log(TAG, `employee:\n`, employee);
+
+        // 请求服务器，获取员工详情
+        const params = {
+            token: localStorage.getItem(LOCAL_STORAGE.TOKEN),
+            id: employee?.id
+        }
+        let response = await httpUtil.post(EmployeeApi.DETAIL, params)
+        if (response?.code == 200) {
+            const r = response as SucResponse
+            const data = r.data.employee;
+            DEBUG && console.log(TAG, `获取员工详情成功:\n`, data);
+            let detail = {
+                id: data.employeeId,
+                code: data.code,                    // 工号
+                name: data.name,                    // 姓名
+                gender: data.gender,                // 性别
+                department: data.departmentName,    // 部门
+                status: data.status,                // 员工状态
+                position: data.positionName,        // 岗位
+                createTime: timeUtil.formatTimestamp(data.createTime),
+                depId: data.departmentId,
+                posId: data.positionId,
+            }
+
+            DEBUG && console.log(TAG, `detail:\n`, detail);
+            this.setState({
+                selectedEmployee: employee,
+                employeeDetail: detail,
+                detailModalVisible: true,
+            });
+        }
+        else if ((response?.code == 400)) {
+            const r = response as ErrResponse
+            console.error(`获取员工详情失败: [${r.errCode}] ${r.errMsg}`);
+            httpUtil.tryGotoLogin(r);
+        }
     };
 
     // 新增：关闭详情模态框
@@ -609,11 +633,12 @@ class _FrameEmployeeGallery extends React.Component<WithTranslation & FrameEmplo
 
     // 新增：渲染详情模态框
     renderDetailModal = () => {
-        const { detailModalVisible, selectedEmployee } = this.state;
+        const { detailModalVisible, selectedEmployee, employeeDetail } = this.state;
         return (
             <EmployeeDetailModal
                 visible={detailModalVisible}
                 employee={selectedEmployee}
+                detail={employeeDetail}
                 onCancel={this.handleDetailModalCancel}
             />
         );
